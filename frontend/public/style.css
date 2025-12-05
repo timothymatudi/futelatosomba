@@ -8,8 +8,42 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     line-height: 1.6;
-    color: #333;
-    background-color: #f4f4f4;
+    color: #1a1a1a;
+    background:
+        linear-gradient(135deg,
+            #007FFF 0%,
+            #007FFF 33%,
+            #FFD700 33%,
+            #FFD700 66%,
+            #CE1126 66%,
+            #CE1126 100%
+        );
+    background-attachment: fixed;
+    position: relative;
+    min-height: 100vh;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background:
+        linear-gradient(135deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.03) 50%,
+            transparent 100%
+        );
+    pointer-events: none;
+    z-index: 0;
+}
+
+main {
+    padding: 1rem;
+    position: relative;
+    z-index: 1;
 }
 
 .container {
@@ -24,10 +58,27 @@ body {
 
 /* Header Styles */
 header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #0066CC 0%, #007FFF 100%);
     color: white;
-    padding: 1rem 0;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    padding: 1.2rem 0;
+    box-shadow:
+        0 10px 40px rgba(0, 0, 0, 0.4),
+        0 5px 20px rgba(0, 102, 204, 0.3),
+        0 2px 10px rgba(255, 215, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    position: relative;
+    z-index: 100;
+}
+
+header::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+    pointer-events: none;
 }
 
 header .container {
@@ -88,7 +139,7 @@ nav a:hover {
 
 .header-signin-link:hover {
     background: white;
-    color: #667eea;
+    color: #007FFF;
 }
 
 #language-switcher select {
@@ -102,10 +153,36 @@ nav a:hover {
 
 /* Hero Section */
 #hero-section {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #007FFF 0%, #0055CC 100%);
     color: white;
-    padding: 4rem 0;
+    padding: 5rem 0;
     text-align: center;
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.5),
+        0 10px 30px rgba(0, 102, 204, 0.4),
+        inset 0 2px 0 rgba(255, 255, 255, 0.3),
+        inset 0 -2px 0 rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+#hero-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background:
+        radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 70% 80%, rgba(255, 215, 0, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+    animation: shine 8s ease-in-out infinite;
+}
+
+@keyframes shine {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(10%, 10%); }
 }
 
 .hero-content {
@@ -145,8 +222,8 @@ nav a:hover {
 
 .tab-btn.active,
 .tab-btn:hover {
-    background: white;
-    color: #667eea;
+    background: #FFD700;
+    color: #007FFF;
 }
 
 /* Search Bar */
@@ -154,10 +231,31 @@ nav a:hover {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
-    background: white;
-    padding: 1rem;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 252, 255, 0.95));
+    padding: 1.5rem;
+    border-radius: 20px;
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.25),
+        0 10px 30px rgba(0, 102, 204, 0.2),
+        0 5px 15px rgba(255, 215, 0, 0.1),
+        inset 0 2px 0 rgba(255, 255, 255, 0.9),
+        inset 0 -2px 0 rgba(0, 0, 0, 0.05);
+    backdrop-filter: blur(20px);
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    position: relative;
+}
+
+.search-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 50%;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.4) 0%, transparent 100%);
+    border-radius: 20px 20px 0 0;
+    pointer-events: none;
 }
 
 .search-bar input,
@@ -172,23 +270,75 @@ nav a:hover {
 
 .search-bar button {
     padding: 0.75rem 2rem;
-    background: #667eea;
-    color: white;
+    background: linear-gradient(135deg, #FFD700 0%, #FFC700 100%);
+    color: #003D7A;
     border: none;
-    border-radius: 5px;
+    border-radius: 12px;
     cursor: pointer;
     font-size: 1rem;
     font-weight: bold;
-    transition: background 0.3s;
+    transition: all 0.3s ease;
+    box-shadow:
+        0 8px 20px rgba(255, 215, 0, 0.4),
+        0 3px 10px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    position: relative;
+    overflow: hidden;
+}
+
+.search-bar button::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transform: rotate(45deg);
+    transition: all 0.5s ease;
 }
 
 .search-bar button:hover {
-    background: #764ba2;
+    background: linear-gradient(135deg, #FFC700 0%, #FFB700 100%);
+    transform: translateY(-2px);
+    box-shadow:
+        0 12px 30px rgba(255, 215, 0, 0.5),
+        0 5px 15px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.search-bar button:hover::before {
+    left: 100%;
 }
 
 /* Sections */
 section {
     padding: 3rem 0;
+    background:
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.97), rgba(250, 250, 250, 0.97));
+    margin: 2rem 0;
+    border-radius: 20px;
+    box-shadow:
+        0 30px 80px rgba(0, 0, 0, 0.3),
+        0 15px 40px rgba(0, 102, 204, 0.2),
+        0 5px 20px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(20px);
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 50%;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.3) 0%, transparent 100%);
+    border-radius: 20px 20px 0 0;
+    pointer-events: none;
 }
 
 section h2 {
@@ -200,11 +350,32 @@ section h2 {
 
 /* Card Sections */
 .card-section {
-    background: white;
-    border-radius: 10px;
-    padding: 2rem;
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 248, 255, 0.98) 100%);
+    border-radius: 20px;
+    padding: 2.5rem;
     margin-bottom: 2rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.2),
+        0 10px 30px rgba(0, 102, 204, 0.15),
+        0 5px 15px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    position: relative;
+    overflow: hidden;
+}
+
+.card-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background:
+        radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.4) 0%, transparent 50%);
+    pointer-events: none;
 }
 
 /* Add Property Button */
@@ -212,8 +383,8 @@ section h2 {
     display: block;
     margin: 0 auto;
     padding: 1rem 2rem;
-    background: #28a745;
-    color: white;
+    background: #FFD700;
+    color: #007FFF;
     border: none;
     border-radius: 5px;
     font-size: 1.1rem;
@@ -222,7 +393,7 @@ section h2 {
 }
 
 #add-property-btn:hover {
-    background: #218838;
+    background: #FFC700;
 }
 
 /* Testimonials */
@@ -234,15 +405,45 @@ section h2 {
 }
 
 .testimonial-card {
-    background: white;
-    padding: 2rem;
-    border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    transition: transform 0.3s;
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(245, 250, 255, 0.95) 100%);
+    padding: 2.5rem;
+    border-radius: 20px;
+    box-shadow:
+        0 15px 50px rgba(0, 0, 0, 0.15),
+        0 8px 25px rgba(0, 102, 204, 0.1),
+        0 3px 10px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    position: relative;
+    overflow: hidden;
+}
+
+.testimonial-card::before {
+    content: '';
+    position: absolute;
+    top: -100%;
+    left: -100%;
+    width: 300%;
+    height: 300%;
+    background:
+        radial-gradient(circle, rgba(255, 255, 255, 0.6) 0%, transparent 60%);
+    transition: all 0.6s ease;
 }
 
 .testimonial-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-15px) scale(1.02);
+    box-shadow:
+        0 30px 80px rgba(0, 0, 0, 0.25),
+        0 15px 40px rgba(0, 102, 204, 0.2),
+        0 8px 20px rgba(255, 215, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
+}
+
+.testimonial-card:hover::before {
+    top: -50%;
+    left: -50%;
 }
 
 .testimonial-card p {
@@ -265,7 +466,7 @@ section h2 {
 
 .customer-info span {
     font-weight: bold;
-    color: #667eea;
+    color: #007FFF;
 }
 
 /* Donation Section */
@@ -299,8 +500,8 @@ section h2 {
 .donation-button {
     display: inline-block;
     padding: 1rem 2rem;
-    background: #28a745;
-    color: white;
+    background: #FFD700;
+    color: #007FFF;
     border: none;
     border-radius: 5px;
     font-size: 1.1rem;
@@ -310,7 +511,7 @@ section h2 {
 }
 
 .donation-button:hover {
-    background: #218838;
+    background: #FFC700;
 }
 
 /* News Grid */
@@ -328,7 +529,7 @@ section h2 {
 }
 
 .news-item h3 {
-    color: #667eea;
+    color: #007FFF;
     margin-bottom: 0.5rem;
 }
 
@@ -340,7 +541,7 @@ section h2 {
 .view-toggle-buttons button {
     padding: 0.5rem 1rem;
     margin-left: 0.5rem;
-    background: #667eea;
+    background: #007FFF;
     color: white;
     border: none;
     border-radius: 5px;
@@ -349,7 +550,7 @@ section h2 {
 }
 
 .view-toggle-buttons button:hover {
-    background: #764ba2;
+    background: #00509E;
 }
 
 .property-grid {
@@ -359,17 +560,44 @@ section h2 {
 }
 
 .property-card {
-    background: white;
-    border-radius: 10px;
+    background:
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.98), rgba(250, 250, 255, 0.98));
+    border-radius: 20px;
     overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    transition: transform 0.3s;
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.2),
+        0 10px 30px rgba(0, 102, 204, 0.15),
+        0 5px 15px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    position: relative;
+}
+
+.property-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+    transition: left 0.6s ease;
+    z-index: 1;
 }
 
 .property-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transform: translateY(-20px) scale(1.03);
+    box-shadow:
+        0 40px 100px rgba(0, 0, 0, 0.3),
+        0 20px 50px rgba(0, 102, 204, 0.25),
+        0 10px 25px rgba(255, 215, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
+}
+
+.property-card:hover::before {
+    left: 100%;
 }
 
 .property-card img {
@@ -389,7 +617,7 @@ section h2 {
 }
 
 .property-price {
-    color: #28a745;
+    color: #FFD700;
     font-size: 1.5rem;
     font-weight: bold;
     margin-bottom: 0.5rem;
@@ -472,7 +700,7 @@ section h2 {
 }
 
 .form-toggle button.active {
-    background: #667eea;
+    background: #007FFF;
     color: white;
 }
 
@@ -496,7 +724,7 @@ section h2 {
 
 .auth-form button {
     padding: 0.75rem;
-    background: #667eea;
+    background: #007FFF;
     color: white;
     border: none;
     border-radius: 5px;
@@ -506,15 +734,33 @@ section h2 {
 }
 
 .auth-form button:hover {
-    background: #764ba2;
+    background: #00509E;
 }
 
 /* Footer */
 footer {
-    background: #2c3e50;
+    background: linear-gradient(135deg, #0055CC 0%, #007FFF 100%);
     color: white;
     padding: 3rem 0 1rem;
     margin-top: 3rem;
+    box-shadow:
+        0 -30px 80px rgba(0, 0, 0, 0.4),
+        0 -15px 40px rgba(0, 102, 204, 0.3),
+        0 -5px 20px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    position: relative;
+    z-index: 10;
+}
+
+footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.08) 0%, transparent 100%);
+    pointer-events: none;
 }
 
 .footer-grid {
@@ -526,7 +772,7 @@ footer {
 
 .footer-col h3 {
     margin-bottom: 1rem;
-    color: #667eea;
+    color: #FFD700;
 }
 
 .footer-col ul {

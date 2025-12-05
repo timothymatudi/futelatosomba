@@ -5,9 +5,21 @@ const cors = require('cors');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const connectDB = require('./config/database');
+
+// Import models
+const Donation = require('./models/Donation');
+const Transaction = require('./models/Transaction');
+
+// Import routes
+const propertyRoutes = require('./routes/properties');
+const userRoutes = require('./routes/users');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Connect to MongoDB
+connectDB();
 
 // Middleware
 app.use(helmet());
@@ -17,6 +29,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Serve static files from frontend
 app.use(express.static('../frontend/public'));
+
+// API Routes
+app.use('/api/properties', propertyRoutes);
+app.use('/api/users', userRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -43,8 +59,19 @@ app.post('/api/create-donation-payment', async (req, res) => {
             description: 'Donation to support community kids in DRC'
         });
 
+        // Save donation to database
+        const donation = new Donation({
+            amount,
+            currency: 'usd',
+            stripePaymentIntentId: paymentIntent.id,
+            status: 'pending',
+            donor: req.body.donor || {}
+        });
+        await donation.save();
+
         res.json({
-            clientSecret: paymentIntent.client_secret
+            clientSecret: paymentIntent.client_secret,
+            donationId: donation._id
         });
     } catch (error) {
         console.error('Error creating payment intent:', error);
@@ -113,13 +140,23 @@ app.post('/api/webhook', bodyParser.raw({ type: 'application/json' }), async (re
         case 'payment_intent.succeeded':
             const paymentIntent = event.data.object;
             console.log('PaymentIntent succeeded:', paymentIntent.id);
-            // Handle successful payment (e.g., update database, send confirmation email)
+
+            // Update donation status in database
+            await Donation.findOneAndUpdate(
+                { stripePaymentIntentId: paymentIntent.id },
+                { status: 'succeeded', receiptUrl: paymentIntent.charges?.data[0]?.receipt_url }
+            );
             break;
 
         case 'checkout.session.completed':
             const session = event.data.object;
             console.log('Checkout session completed:', session.id);
-            // Handle successful checkout (e.g., activate premium listing)
+
+            // Update transaction status in database
+            await Transaction.findOneAndUpdate(
+                { stripeSessionId: session.id },
+                { status: 'succeeded', completedAt: new Date() }
+            );
             break;
 
         case 'payment_intent.payment_failed':

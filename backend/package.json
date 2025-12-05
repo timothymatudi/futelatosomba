@@ -18,12 +18,15 @@
   "author": "futelatosomba",
   "license": "MIT",
   "dependencies": {
-    "express": "^4.18.2",
+    "bcryptjs": "^3.0.3",
+    "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
-    "stripe": "^14.10.0",
-    "body-parser": "^1.20.2",
-    "helmet": "^7.1.0"
+    "express": "^4.18.2",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.0.0",
+    "stripe": "^14.10.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
