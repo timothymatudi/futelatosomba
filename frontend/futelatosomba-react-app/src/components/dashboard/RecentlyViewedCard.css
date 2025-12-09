@@ -1,0 +1,120 @@
+.recently-viewed-card {
+  background-color: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+}
+
+.recently-viewed-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.recently-viewed-image {
+  position: relative;
+  width: 100%;
+  height: 160px;
+  overflow: hidden;
+}
+
+.recently-viewed-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.recently-viewed-card:hover .recently-viewed-image img {
+  transform: scale(1.08);
+}
+
+.recently-viewed-premium {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 5px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.recently-viewed-content {
+  padding: 14px;
+}
+
+.recently-viewed-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.3;
+}
+
+.recently-viewed-price {
+  font-size: 20px;
+  font-weight: 700;
+  color: #007FFF;
+  margin-bottom: 8px;
+}
+
+.recently-viewed-location {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.recently-viewed-location svg {
+  color: #999;
+  flex-shrink: 0;
+}
+
+.recently-viewed-specs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.recently-viewed-time {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #999;
+  padding-top: 10px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.recently-viewed-time svg {
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .recently-viewed-image {
+    height: 140px;
+  }
+
+  .recently-viewed-title {
+    font-size: 15px;
+  }
+
+  .recently-viewed-price {
+    font-size: 18px;
+  }
+}

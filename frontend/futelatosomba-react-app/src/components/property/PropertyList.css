@@ -1,0 +1,54 @@
+/* Rightmove-style Property Grid: 3 columns desktop, 2 tablet, 1 mobile */
+.property-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 columns on desktop */
+  gap: 20px;
+  width: 100%;
+  margin-top: 24px;
+}
+
+.property-list-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  text-align: center;
+  color: var(--text-light);
+  background-color: var(--background-light);
+  border-radius: 0;
+}
+
+.property-list-empty svg {
+  color: var(--border);
+  margin-bottom: 20px;
+}
+
+.property-list-empty h3 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin: 0 0 12px 0;
+}
+
+.property-list-empty p {
+  font-size: 16px;
+  margin: 0;
+  color: var(--text-light);
+}
+
+/* Tablet: 2 columns */
+@media (max-width: 1024px) {
+  .property-list {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+/* Mobile: 1 column */
+@media (max-width: 640px) {
+  .property-list {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}

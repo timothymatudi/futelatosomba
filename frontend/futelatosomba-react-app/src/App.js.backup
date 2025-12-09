@@ -1,0 +1,45 @@
+import React from 'react';
+import './style.css';
+import Layout from './components/Layout';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext'; // Import AuthProvider
+
+// Import page components
+import PropertySearchPage from './pages/PropertySearchPage';
+import PropertyDetailPage from './pages/PropertyDetailPage';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import AgentDashboardPage from './pages/AgentDashboardPage';
+import AgentPropertyForm from './components/AgentPropertyForm';
+import UserProfilePage from './pages/UserProfilePage';
+
+function App() {
+  return (
+    <Router>
+      <AuthProvider> {/* Wrap the entire application with AuthProvider */}
+        <Layout>
+          <Routes>
+            <Route path="/" element={
+              <div className="App-content">
+                <h2>Welcome to futelatosomba</h2>
+                <p>Your one-stop solution for property search in DRC.</p>
+                {/* This will eventually be our Home Page component */}
+              </div>
+            } />
+            {/* Other routes */}
+            <Route path="/properties" element={<PropertySearchPage />} />
+            <Route path="/properties/:id" element={<PropertyDetailPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/agent/dashboard" element={<AgentDashboardPage />} />
+            <Route path="/agent/properties/add" element={<AgentPropertyForm />} />
+            <Route path="/agent/properties/edit/:id" element={<AgentPropertyForm />} />
+            <Route path="/profile" element={<UserProfilePage />} />
+          </Routes>
+        </Layout>
+      </AuthProvider>
+    </Router>
+  );
+}
+
+export default App;

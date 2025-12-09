@@ -1,0 +1,15 @@
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 500px;
+}
+
+.auth-form .input-wrapper {
+  margin-bottom: 0;
+}
+
+.auth-form button[type="submit"] {
+  margin-top: 8px;
+}

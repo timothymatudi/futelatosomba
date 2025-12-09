@@ -75,14 +75,30 @@ const propertySchema = new mongoose.Schema({
         coordinates: {
             lat: {
                 type: Number,
-                required: [true, 'Please provide latitude']
+                required: [true, 'Please provide latitude'],
+                min: [-90, 'Latitude must be between -90 and 90'],
+                max: [90, 'Latitude must be between -90 and 90']
             },
             lng: {
                 type: Number,
-                required: [true, 'Please provide longitude']
+                required: [true, 'Please provide longitude'],
+                min: [-180, 'Longitude must be between -180 and 180'],
+                max: [180, 'Longitude must be between -180 and 180']
             }
         },
-        zipCode: String
+        zipCode: String,
+        // GeoJSON format for geospatial queries
+        geoLocation: {
+            type: {
+                type: String,
+                enum: ['Point'],
+                default: 'Point'
+            },
+            coordinates: {
+                type: [Number],
+                index: '2dsphere'
+            }
+        }
     },
     images: [{
         url: {
@@ -166,6 +182,18 @@ const propertySchema = new mongoose.Schema({
     toObject: { virtuals: true }
 });
 
+// Pre-save middleware to automatically populate geoLocation from coordinates
+propertySchema.pre('save', function(next) {
+    if (this.location && this.location.coordinates && this.location.coordinates.lat && this.location.coordinates.lng) {
+        // GeoJSON format uses [longitude, latitude] order
+        this.location.geoLocation = {
+            type: 'Point',
+            coordinates: [this.location.coordinates.lng, this.location.coordinates.lat]
+        };
+    }
+    next();
+});
+
 // Indexes for better query performance
 propertySchema.index({ 'location.city': 1, listingType: 1 });
 propertySchema.index({ price: 1 });
@@ -173,6 +201,9 @@ propertySchema.index({ propertyType: 1 });
 propertySchema.index({ status: 1 });
 propertySchema.index({ owner: 1 });
 propertySchema.index({ 'location.coordinates.lat': 1, 'location.coordinates.lng': 1 });
+propertySchema.index({ views: -1 });
+// 2dsphere index for geospatial queries
+propertySchema.index({ 'location.geoLocation': '2dsphere' });
 
 // Virtual for primary image
 propertySchema.virtual('primaryImage').get(function() {

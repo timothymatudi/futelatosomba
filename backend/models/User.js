@@ -1,105 +1,115 @@
-// User model for authentication and user management
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-const userSchema = new mongoose.Schema({
-    username: {
-        type: String,
-        required: [true, 'Please provide a username'],
-        unique: true,
-        trim: true,
-        minlength: [3, 'Username must be at least 3 characters'],
-        maxlength: [30, 'Username cannot exceed 30 characters']
+const UserSchema = new mongoose.Schema({
+  username: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  password: {
+    type: String,
+    required: true,
+    select: false
+  },
+  firstName: {
+    type: String,
+    required: false
+  },
+  lastName: {
+    type: String,
+    required: false
+  },
+  phone: {
+    type: String,
+    required: false
+  },
+  agencyName: {
+    type: String,
+    required: function() { return this.role === 'agent'; } // Required only if role is 'agent'
+  },
+  licenseNumber: {
+    type: String,
+    required: function() { return this.role === 'agent'; },
+    unique: true, // License numbers should be unique
+    sparse: true // Allows null values, so uniqueness only applies to non-null values
+  },
+  agencyAddress: {
+    type: String,
+    required: function() { return this.role === 'agent'; }
+  },
+  agencyLogo: { // URL to the agency logo
+    type: String
+  },
+  role: {
+    type: String,
+    enum: ['user', 'admin', 'agent'],
+    default: 'user'
+  },
+  isPremium: {
+    type: Boolean,
+    default: false
+  },
+  properties: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Property'
+  }],
+  savedSearches: [{
+    name: String,
+    query: String,
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
+  }],
+  propertyAlerts: [{ // Added Property Alerts
+    name: { type: String, required: true },
+    query: { type: mongoose.Schema.Types.Mixed, required: true }, // Store search criteria
+    frequency: {
+      type: String,
+      enum: ['instant', 'daily', 'weekly'],
+      default: 'daily'
     },
-    email: {
-        type: String,
-        required: [true, 'Please provide an email'],
-        unique: true,
-        lowercase: true,
-        trim: true,
-        match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please provide a valid email']
-    },
-    password: {
-        type: String,
-        required: [true, 'Please provide a password'],
-        minlength: [6, 'Password must be at least 6 characters'],
-        select: false
-    },
-    role: {
-        type: String,
-        enum: ['user', 'agent', 'admin'],
-        default: 'user'
-    },
-    firstName: {
-        type: String,
-        trim: true
-    },
-    lastName: {
-        type: String,
-        trim: true
-    },
-    phone: {
-        type: String,
-        trim: true
-    },
-    avatar: {
-        type: String,
-        default: 'https://i.pravatar.cc/150'
-    },
-    isVerified: {
-        type: Boolean,
-        default: false
-    },
-    isPremium: {
-        type: Boolean,
-        default: false
-    },
-    premiumExpiresAt: {
+    lastNotifiedAt: {
         type: Date
-    },
-    stripeCustomerId: {
-        type: String
     },
     createdAt: {
         type: Date,
         default: Date.now
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now
     }
-}, {
-    timestamps: true,
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true }
+  }],
+  // Password reset fields
+  resetPasswordToken: String,
+  resetPasswordExpires: Date,
+  // Email verification fields
+  emailVerificationToken: String,
+  emailVerificationExpires: Date,
+  isEmailVerified: {
+    type: Boolean,
+    default: false
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
 });
 
-// Virtual for user's properties
-userSchema.virtual('properties', {
-    ref: 'Property',
-    localField: '_id',
-    foreignField: 'owner'
+UserSchema.pre('save', async function(next) {
+  if (!this.isModified('password')) {
+    return next();
+  }
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+  next();
 });
 
-// Hash password before saving
-userSchema.pre('save', async function(next) {
-    if (!this.isModified('password')) {
-        return next();
-    }
-
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-});
-
-// Method to compare password
-userSchema.methods.comparePassword = async function(candidatePassword) {
-    return await bcrypt.compare(candidatePassword, this.password);
+UserSchema.methods.comparePassword = async function(candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
 };
 
-// Method to get full name
-userSchema.methods.getFullName = function() {
-    return `${this.firstName || ''} ${this.lastName || ''}`.trim() || this.username;
-};
-
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model('User', UserSchema);

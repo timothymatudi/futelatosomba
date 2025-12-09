@@ -4,8 +4,9 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const connectDB = require('./config/database');
+const connectDB = require('./config/mongoose');
 
 // Import models
 const Donation = require('./models/Donation');
@@ -14,6 +15,28 @@ const Transaction = require('./models/Transaction');
 // Import routes
 const propertyRoutes = require('./routes/properties');
 const userRoutes = require('./routes/users');
+const authRoutes = require('./routes/auth');
+const adminRoutes = require('./routes/admin');
+
+// Import security middleware
+const {
+    apiLimiter,
+    authLimiter,
+    uploadLimiter,
+    paymentLimiter,
+    contactLimiter,
+    passwordResetLimiter
+} = require('./middleware/rateLimiter');
+const {
+    sanitizeQueryParams,
+    sanitizeMongoQuery,
+    validatePaymentAmount
+} = require('./middleware/validation');
+const {
+    generateCsrfToken,
+    validateCsrfToken,
+    getCsrfToken
+} = require('./middleware/csrf');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -21,26 +44,132 @@ const PORT = process.env.PORT || 3000;
 // Connect to MongoDB
 connectDB();
 
-// Middleware
-app.use(helmet());
-app.use(cors());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+// Security Middleware - Applied in specific order
 
-// Serve static files from frontend
-app.use(express.static('../frontend/public'));
+// 1. Enhanced Helmet configuration with proper CSP
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: [
+                "'self'",
+                "'unsafe-inline'",
+                "'unsafe-eval'", // Required for React
+                "https://js.stripe.com",
+                "https://cdn.jsdelivr.net"
+            ],
+            styleSrc: [
+                "'self'",
+                "'unsafe-inline'",
+                "https://fonts.googleapis.com"
+            ],
+            fontSrc: [
+                "'self'",
+                "https://fonts.gstatic.com"
+            ],
+            imgSrc: [
+                "'self'",
+                "data:",
+                "https:",
+                "blob:"
+            ],
+            connectSrc: [
+                "'self'",
+                "https://api.stripe.com"
+            ],
+            frameSrc: [
+                "https://js.stripe.com",
+                "https://hooks.stripe.com"
+            ],
+            objectSrc: ["'none'"],
+            upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : null
+        }
+    },
+    crossOriginEmbedderPolicy: false, // Allow embedding for Stripe
+    hsts: {
+        maxAge: 31536000, // 1 year
+        includeSubDomains: true,
+        preload: true
+    },
+    frameguard: {
+        action: 'deny'
+    },
+    noSniff: true,
+    xssFilter: true,
+    referrerPolicy: {
+        policy: 'strict-origin-when-cross-origin'
+    }
+}));
 
-// API Routes
-app.use('/api/properties', propertyRoutes);
-app.use('/api/users', userRoutes);
+// 2. CORS configuration
+app.use(cors({
+    origin: process.env.CLIENT_URL || 'http://localhost:3000',
+    credentials: true, // Allow cookies to be sent
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token', 'x-csrf-token']
+}));
 
-// Health check endpoint
+// 3. Cookie parser (required for CSRF protection)
+app.use(cookieParser());
+
+// 4. Body parsing middleware
+app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
+
+// 5. Query parameter sanitization
+app.use(sanitizeQueryParams);
+
+// 6. NoSQL injection protection
+app.use(sanitizeMongoQuery);
+
+// 7. Generate CSRF token for all requests
+app.use(generateCsrfToken);
+
+// Serve static files from frontend production build
+app.use(express.static('../frontend/futelatosomba-react-app/build'));
+
+// Serve uploaded files
+app.use('/uploads', express.static('uploads'));
+
+// CSRF token endpoint - must come before validateCsrfToken middleware
+app.get('/api/csrf-token', getCsrfToken);
+
+// Health check endpoint (no rate limiting or CSRF protection)
 app.get('/api/health', (req, res) => {
     res.json({ status: 'OK', message: 'Server is running' });
 });
 
+// Apply CSRF validation to all API routes except webhooks
+app.use('/api', (req, res, next) => {
+    // Skip CSRF for webhook endpoints (they use their own verification)
+    if (req.path.startsWith('/webhook')) {
+        return next();
+    }
+    // Skip for GET requests and health check
+    if (req.method === 'GET' || req.path === '/health' || req.path === '/csrf-token') {
+        return next();
+    }
+    validateCsrfToken(req, res, next);
+});
+
+// API Routes with rate limiting
+
+// Authentication routes - strict rate limiting
+app.use('/api/auth', authLimiter, authRoutes);
+
+// Property routes - general API rate limiting
+app.use('/api/properties', apiLimiter, propertyRoutes);
+
+// User routes - general API rate limiting
+app.use('/api/users', apiLimiter, userRoutes);
+
+// Admin routes - general API rate limiting
+app.use('/api/admin', apiLimiter, adminRoutes);
+
+// Payment Endpoints with rate limiting and validation
+
 // Create donation payment intent
-app.post('/api/create-donation-payment', async (req, res) => {
+app.post('/api/create-donation-payment', paymentLimiter, validatePaymentAmount, async (req, res) => {
     try {
         const { amount } = req.body;
 
@@ -48,13 +177,18 @@ app.post('/api/create-donation-payment', async (req, res) => {
             return res.status(400).json({ error: 'Invalid amount. Minimum donation is $0.50' });
         }
 
+        // Log payment attempt for security monitoring
+        const ip = req.ip || req.connection.remoteAddress;
+        console.log(`[PAYMENT] Donation payment attempt - Amount: $${amount / 100}, IP: ${ip}, Time: ${new Date().toISOString()}`);
+
         // Create a PaymentIntent
         const paymentIntent = await stripe.paymentIntents.create({
             amount: amount,
             currency: 'usd',
             metadata: {
                 type: 'donation',
-                purpose: 'Community Kids Support'
+                purpose: 'Community Kids Support',
+                ip: ip
             },
             description: 'Donation to support community kids in DRC'
         });
@@ -80,13 +214,17 @@ app.post('/api/create-donation-payment', async (req, res) => {
 });
 
 // Create premium listing checkout session
-app.post('/api/create-premium-checkout', async (req, res) => {
+app.post('/api/create-premium-checkout', paymentLimiter, validatePaymentAmount, async (req, res) => {
     try {
         const { amount } = req.body;
 
         if (!amount) {
             return res.status(400).json({ error: 'Amount is required' });
         }
+
+        // Log payment attempt for security monitoring
+        const ip = req.ip || req.connection.remoteAddress;
+        console.log(`[PAYMENT] Premium checkout attempt - Amount: $${amount / 100}, IP: ${ip}, Time: ${new Date().toISOString()}`);
 
         // Create Checkout Session
         const session = await stripe.checkout.sessions.create({
@@ -108,7 +246,8 @@ app.post('/api/create-premium-checkout', async (req, res) => {
             success_url: `${process.env.CLIENT_URL || 'http://localhost:3000'}/payment-success.html?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${process.env.CLIENT_URL || 'http://localhost:3000'}/index.html`,
             metadata: {
-                type: 'premium_listing'
+                type: 'premium_listing',
+                ip: ip
             }
         });
 
@@ -119,7 +258,7 @@ app.post('/api/create-premium-checkout', async (req, res) => {
     }
 });
 
-// Webhook endpoint for Stripe events
+// Webhook endpoint for Stripe events (no CSRF protection, uses Stripe signature verification)
 app.post('/api/webhook', bodyParser.raw({ type: 'application/json' }), async (req, res) => {
     const sig = req.headers['stripe-signature'];
     let event;
@@ -131,15 +270,18 @@ app.post('/api/webhook', bodyParser.raw({ type: 'application/json' }), async (re
             process.env.STRIPE_WEBHOOK_SECRET
         );
     } catch (err) {
-        console.error('Webhook signature verification failed:', err.message);
+        console.error('[SECURITY] Webhook signature verification failed:', err.message);
         return res.status(400).send(`Webhook Error: ${err.message}`);
     }
+
+    // Log webhook event for security monitoring
+    console.log(`[WEBHOOK] Received event: ${event.type}, ID: ${event.id}, Time: ${new Date().toISOString()}`);
 
     // Handle the event
     switch (event.type) {
         case 'payment_intent.succeeded':
             const paymentIntent = event.data.object;
-            console.log('PaymentIntent succeeded:', paymentIntent.id);
+            console.log('[PAYMENT] PaymentIntent succeeded:', paymentIntent.id);
 
             // Update donation status in database
             await Donation.findOneAndUpdate(
@@ -150,7 +292,7 @@ app.post('/api/webhook', bodyParser.raw({ type: 'application/json' }), async (re
 
         case 'checkout.session.completed':
             const session = event.data.object;
-            console.log('Checkout session completed:', session.id);
+            console.log('[PAYMENT] Checkout session completed:', session.id);
 
             // Update transaction status in database
             await Transaction.findOneAndUpdate(
@@ -161,21 +303,26 @@ app.post('/api/webhook', bodyParser.raw({ type: 'application/json' }), async (re
 
         case 'payment_intent.payment_failed':
             const failedPayment = event.data.object;
-            console.log('Payment failed:', failedPayment.id);
+            console.warn('[PAYMENT] Payment failed:', failedPayment.id, 'Reason:', failedPayment.last_payment_error?.message);
             // Handle failed payment
             break;
 
         default:
-            console.log(`Unhandled event type ${event.type}`);
+            console.log(`[WEBHOOK] Unhandled event type ${event.type}`);
     }
 
     res.json({ received: true });
 });
 
-// Get payment status
-app.get('/api/payment-status/:paymentIntentId', async (req, res) => {
+// Get payment status (with rate limiting)
+app.get('/api/payment-status/:paymentIntentId', apiLimiter, async (req, res) => {
     try {
         const { paymentIntentId } = req.params;
+
+        // Validate payment intent ID format
+        if (!paymentIntentId || !paymentIntentId.startsWith('pi_')) {
+            return res.status(400).json({ error: 'Invalid payment intent ID' });
+        }
 
         const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
@@ -190,10 +337,15 @@ app.get('/api/payment-status/:paymentIntentId', async (req, res) => {
     }
 });
 
-// Get checkout session status
-app.get('/api/checkout-session/:sessionId', async (req, res) => {
+// Get checkout session status (with rate limiting)
+app.get('/api/checkout-session/:sessionId', apiLimiter, async (req, res) => {
     try {
         const { sessionId } = req.params;
+
+        // Validate session ID format
+        if (!sessionId || !sessionId.startsWith('cs_')) {
+            return res.status(400).json({ error: 'Invalid session ID' });
+        }
 
         const session = await stripe.checkout.sessions.retrieve(sessionId);
 
@@ -210,18 +362,63 @@ app.get('/api/checkout-session/:sessionId', async (req, res) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-    console.error('Server error:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    const ip = req.ip || req.connection.remoteAddress;
+    const endpoint = req.originalUrl || req.url;
+
+    // Log error with security context
+    console.error(`[ERROR] Server error - IP: ${ip}, Endpoint: ${endpoint}, Time: ${new Date().toISOString()}`);
+    console.error('Error details:', err);
+
+    // Don't expose internal error details in production
+    if (process.env.NODE_ENV === 'production') {
+        res.status(500).json({
+            error: 'Internal server error',
+            message: 'An unexpected error occurred. Please try again later.'
+        });
+    } else {
+        res.status(500).json({
+            error: 'Internal server error',
+            message: err.message,
+            stack: err.stack
+        });
+    }
 });
 
 // 404 handler
 app.use((req, res) => {
-    res.status(404).json({ error: 'Not found' });
+    const ip = req.ip || req.connection.remoteAddress;
+    const endpoint = req.originalUrl || req.url;
+
+    console.warn(`[404] Not found - IP: ${ip}, Endpoint: ${endpoint}, Method: ${req.method}, Time: ${new Date().toISOString()}`);
+
+    res.status(404).json({
+        error: 'Not found',
+        message: 'The requested resource was not found on this server'
+    });
 });
 
-// Start server
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-    console.log(`Frontend available at http://localhost:${PORT}`);
-    console.log(`API available at http://localhost:${PORT}/api`);
-});
+// Start server (only in non-serverless environment)
+if (process.env.VERCEL !== '1') {
+    app.listen(PORT, () => {
+        console.log('='.repeat(60));
+        console.log('  FUTELATOSOMBA BACKEND SERVER');
+        console.log('='.repeat(60));
+        console.log(`Server running on port ${PORT}`);
+        console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+        console.log(`Frontend available at http://localhost:${PORT}`);
+        console.log(`API available at http://localhost:${PORT}/api`);
+        console.log('');
+        console.log('Security Features Enabled:');
+        console.log('  - Rate Limiting (API, Auth, Upload, Payment)');
+        console.log('  - CSRF Protection (Double Submit Cookie)');
+        console.log('  - XSS Protection (Input Sanitization)');
+        console.log('  - NoSQL Injection Prevention');
+        console.log('  - Helmet Security Headers');
+        console.log('  - Content Security Policy');
+        console.log('  - CORS Configuration');
+        console.log('='.repeat(60));
+    });
+}
+
+// Export for Vercel serverless
+module.exports = app;

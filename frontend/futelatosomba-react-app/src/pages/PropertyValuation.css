@@ -1,0 +1,351 @@
+.property-valuation-page {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.valuation-hero {
+  background: linear-gradient(135deg, #ff6b6b, #c92a2a);
+  color: white;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.valuation-hero h1 {
+  font-size: 42px;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+}
+
+.valuation-hero p {
+  font-size: 18px;
+  margin: 0;
+  opacity: 0.95;
+}
+
+.valuation-container {
+  max-width: 800px;
+  margin: -40px auto 40px;
+  padding: 0 20px;
+}
+
+.progress-bar {
+  background-color: #e0e0e0;
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.progress-fill {
+  background: linear-gradient(90deg, #ff6b6b, #c92a2a);
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.step-indicator {
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 24px;
+  font-weight: 600;
+}
+
+.valuation-form {
+  background-color: white;
+  border-radius: 12px;
+  padding: 40px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.valuation-step h2 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
+}
+
+.step-description {
+  font-size: 15px;
+  color: #666;
+  margin: 0 0 32px 0;
+}
+
+.form-group {
+  margin-bottom: 24px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 15px;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #ff6b6b;
+  box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 16px;
+}
+
+.feature-checkbox input {
+  display: none;
+}
+
+.feature-card {
+  padding: 20px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.feature-checkbox input:checked + .feature-card {
+  border-color: #ff6b6b;
+  background-color: rgba(255, 107, 107, 0.05);
+}
+
+.feature-card svg {
+  color: #999;
+  margin-bottom: 8px;
+}
+
+.feature-checkbox input:checked + .feature-card svg {
+  color: #ff6b6b;
+}
+
+.feature-card span {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.radio-group {
+  display: flex;
+  gap: 16px;
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.radio-option input {
+  width: auto;
+  accent-color: #ff6b6b;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.btn-prev,
+.btn-next,
+.btn-submit {
+  padding: 14px 32px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-prev {
+  background-color: #f5f5f5;
+  color: #666;
+}
+
+.btn-prev:hover {
+  background-color: #e0e0e0;
+}
+
+.btn-next,
+.btn-submit {
+  background: linear-gradient(135deg, #ff6b6b, #c92a2a);
+  color: white;
+  margin-left: auto;
+}
+
+.btn-next:hover,
+.btn-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+.btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.valuation-result {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.result-icon {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 24px;
+  background: linear-gradient(135deg, #28a745, #1e7e34);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.valuation-result h2 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 32px 0;
+}
+
+.valuation-estimate {
+  background: linear-gradient(135deg, #ff6b6b10, #c92a2a10);
+  border-radius: 12px;
+  padding: 32px;
+  margin-bottom: 32px;
+}
+
+.estimate-label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.estimate-value {
+  font-size: 48px;
+  font-weight: 700;
+  color: #ff6b6b;
+  margin-bottom: 12px;
+}
+
+.estimate-range {
+  font-size: 16px;
+  color: #666;
+}
+
+.valuation-details {
+  text-align: left;
+  margin-bottom: 32px;
+}
+
+.valuation-details h3,
+.valuation-details h4 {
+  color: #1a1a1a;
+  margin: 0 0 16px 0;
+}
+
+.next-steps ul {
+  list-style: none;
+  padding: 0;
+}
+
+.next-steps li {
+  padding: 12px 0;
+  padding-left: 32px;
+  position: relative;
+}
+
+.next-steps li:before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: #28a745;
+  font-weight: 700;
+}
+
+.btn-new-valuation {
+  padding: 14px 32px;
+  background: linear-gradient(135deg, #ff6b6b, #c92a2a);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-new-valuation:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+@media (max-width: 768px) {
+  .valuation-hero {
+    padding: 40px 20px;
+  }
+
+  .valuation-hero h1 {
+    font-size: 32px;
+  }
+
+  .valuation-container {
+    margin: -30px 12px 30px;
+  }
+
+  .valuation-form {
+    padding: 24px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .radio-group {
+    flex-direction: column;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .btn-prev,
+  .btn-next,
+  .btn-submit {
+    width: 100%;
+  }
+
+  .estimate-value {
+    font-size: 36px;
+  }
+}
