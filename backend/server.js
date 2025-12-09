@@ -154,6 +154,15 @@ app.use('/api', (req, res, next) => {
 
 // API Routes with rate limiting
 
+// Health check endpoint (no rate limiting)
+app.get('/api/health', (req, res) => {
+    res.status(200).json({
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime()
+    });
+});
+
 // Authentication routes - strict rate limiting
 app.use('/api/auth', authLimiter, authRoutes);
 
