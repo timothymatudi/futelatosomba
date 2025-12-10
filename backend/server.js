@@ -41,6 +41,9 @@ const {
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust proxy for Render deployment (fixes rate limiting warnings)
+app.set('trust proxy', 1);
+
 // Connect to MongoDB
 connectDB();
 
