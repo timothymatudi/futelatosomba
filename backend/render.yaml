@@ -10,9 +10,9 @@ services:
       - key: PORT
         value: 10000
       - key: MONGO_DATABASE_URL
-        sync: false
+        value: mongodb+srv://timomatudi_db_user:LUBUZi1044%40%29@cluster0.iuhojxz.mongodb.net/futelatosomba
       - key: JWT_SECRET
-        generateValue: true
+        value: futelatosomba_super_secure_jwt_secret_key_2024_production_v1
       - key: STRIPE_SECRET_KEY
         sync: false
       - key: STRIPE_PUBLISHABLE_KEY
@@ -32,8 +32,8 @@ services:
       - key: EMAIL_FROM
         value: noreply@futelatosomba.com
       - key: FRONTEND_URL
-        sync: false
+        value: https://futelatosomba-frontend-f1sgrgm90-timothy-s-projects-61ca8a51.vercel.app
       - key: CLIENT_URL
-        sync: false
+        value: https://futelatosomba-frontend-f1sgrgm90-timothy-s-projects-61ca8a51.vercel.app
     healthCheckPath: /api/health
     autoDeploy: true
