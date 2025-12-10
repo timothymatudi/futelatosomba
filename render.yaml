@@ -33,8 +33,8 @@ services:
       - key: EMAIL_FROM
         value: noreply@futelatosomba.com
       - key: FRONTEND_URL
-        value: https://futelatosomba-frontend-f1sgrgm90-timothy-s-projects-61ca8a51.vercel.app
+        value: https://futelatosomba-frontend.vercel.app
       - key: CLIENT_URL
-        value: https://futelatosomba-frontend-f1sgrgm90-timothy-s-projects-61ca8a51.vercel.app
+        value: https://futelatosomba-frontend.vercel.app
     healthCheckPath: /api/health
     autoDeploy: true

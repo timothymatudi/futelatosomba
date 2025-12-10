@@ -5,8 +5,8 @@
 
 export MONGO_DATABASE_URL="mongodb+srv://timomatudi_db_user:LUBUZi1044%40%29@cluster0.iuhojxz.mongodb.net/futelatosomba"
 export JWT_SECRET="futelatosomba_super_secure_jwt_secret_key_2024_production_v1"
-export FRONTEND_URL="https://futelatosomba-frontend-f1sgrgm90-timothy-s-projects-61ca8a51.vercel.app"
-export CLIENT_URL="https://futelatosomba-frontend-f1sgrgm90-timothy-s-projects-61ca8a51.vercel.app"
+export FRONTEND_URL="https://futelatosomba-frontend.vercel.app"
+export CLIENT_URL="https://futelatosomba-frontend.vercel.app"
 export NODE_ENV="production"
 export PORT="${PORT:-10000}"
 
