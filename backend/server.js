@@ -104,9 +104,31 @@ app.use(helmet({
     }
 }));
 
-// 2. CORS configuration
+// 2. CORS configuration - Allow multiple origins including Vercel previews
+const allowedOrigins = [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    process.env.CLIENT_URL,
+    process.env.FRONTEND_URL,
+];
+
 app.use(cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:3000',
+    origin: (origin, callback) => {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+
+        // Allow any Vercel preview deployment
+        if (origin.includes('vercel.app')) {
+            return callback(null, true);
+        }
+
+        // Allow configured origins
+        if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+
+        callback(new Error('Not allowed by CORS'));
+    },
     credentials: true, // Allow cookies to be sent
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token', 'x-csrf-token']
