@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLanguage } from '../../context/LanguageContext';
-import { formatPrice, formatArea, formatDate } from '../../utils/formatters';
+import { formatArea, formatDate } from '../../utils/formatters';
 import { PROPERTY_TYPE_LABELS, AMENITIES } from '../../utils/constants';
 import './PropertyInfo.css';
 

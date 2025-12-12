@@ -9,7 +9,7 @@ import './PropertyForm.css';
 
 const PropertyForm = ({ initialData = null, isEdit = false }) => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
 
@@ -94,12 +94,11 @@ const PropertyForm = ({ initialData = null, isEdit = false }) => {
         }
       });
 
-      let response;
       if (isEdit && initialData?._id) {
-        response = await propertyService.updateProperty(initialData._id, formDataToSend);
+        await propertyService.updateProperty(initialData._id, formDataToSend);
         toast.success('Property updated successfully!');
       } else {
-        response = await propertyService.createProperty(formDataToSend);
+        await propertyService.createProperty(formDataToSend);
         toast.success('Property created successfully!');
       }
 

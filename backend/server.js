@@ -39,7 +39,7 @@ const {
 } = require('./middleware/csrf');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // Trust proxy for Render deployment (fixes rate limiting warnings)
 app.set('trust proxy', 1);

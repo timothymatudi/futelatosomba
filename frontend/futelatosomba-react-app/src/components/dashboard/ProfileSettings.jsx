@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import api from '../../services/api';
+
 import { toast } from 'react-toastify';
 import './ProfileSettings.css';
 
@@ -22,7 +22,7 @@ const ProfileSettings = () => {
   });
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value, checked } = e.target;
 
     if (name.startsWith('notification_')) {
       const notifKey = name.replace('notification_', '');

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { toast } from 'react-toastify';
@@ -14,11 +14,7 @@ const FindAgents = () => {
     search: ''
   });
 
-  useEffect(() => {
-    fetchAgents();
-  }, []);
-
-  const fetchAgents = async () => {
+  const fetchAgents = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
@@ -32,7 +28,11 @@ const FindAgents = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]); // filters is a dependency of fetchAgents
+
+  useEffect(() => {
+    fetchAgents();
+  }, [fetchAgents]); // fetchAgents is now a stable dependency
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;

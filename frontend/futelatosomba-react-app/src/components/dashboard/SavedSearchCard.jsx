@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { formatDate, formatPrice } from '../../utils/formatters';
+import { formatDate } from '../../utils/formatters';
 import './SavedSearchCard.css';
 
 const SavedSearchCard = ({ search, onDelete, onEdit }) => {

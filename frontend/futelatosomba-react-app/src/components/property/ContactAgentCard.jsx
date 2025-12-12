@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { useLanguage } from '../../context/LanguageContext';
 import { getInitials, formatPhoneNumber } from '../../utils/formatters';
 import api from '../../services/api';
 import { toast } from 'react-toastify';
@@ -8,7 +7,6 @@ import './ContactAgentCard.css';
 
 const ContactAgentCard = ({ property }) => {
   const { user, isAuthenticated } = useAuth();
-  const { getLabel } = useLanguage();
   const [showContactForm, setShowContactForm] = useState(false);
   const [formData, setFormData] = useState({
     name: user?.fullName || '',

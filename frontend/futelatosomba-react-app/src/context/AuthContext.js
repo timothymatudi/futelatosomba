@@ -76,8 +76,10 @@ export const AuthProvider = ({ children }) => {
         lastName = nameParts.slice(1).join(' ');
       }
 
+      const username = userData.email.split('@')[0] + Math.floor(Math.random() * 10000);
+
       const payload = {
-        username: userData.email, // Use email as username for now, or add a username field to form
+        username: username,
         email: userData.email,
         password: userData.password,
         firstName,

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 // import './MarketDataPage.css'; // Will create this later
 
 function MarketDataPage() {
@@ -9,7 +9,7 @@ function MarketDataPage() {
   const [error, setError] = useState(null);
   const [cityFilter, setCityFilter] = useState(''); // State for city filter
 
-  const fetchMarketData = async () => {
+  const fetchMarketData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -47,11 +47,11 @@ function MarketDataPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [cityFilter]); // fetchMarketData depends on cityFilter
 
   useEffect(() => {
     fetchMarketData();
-  }, [cityFilter]); // Refetch when city filter changes
+  }, [fetchMarketData]); // fetchMarketData is now a stable dependency
 
   if (loading && !overviewStats) { // Show loading only initially or when city filter changes
     return <p>Loading market data...</p>;

@@ -38,7 +38,7 @@ const registerSchema = yup.object().shape({
 });
 
 const RegisterForm = ({ onSuccess }) => {
-  const { register: registerUser } = useAuth();
+  const { register: registerUser, error: authError, setError: setAuthError } = useAuth();
   const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
 
@@ -57,18 +57,31 @@ const RegisterForm = ({ onSuccess }) => {
   const role = watch('role'); // Watch the role field
 
   const onSubmit = async (data) => {
+    console.log('Submitting registration form with data:', data);
     setLoading(true);
+    setAuthError(null);
     const { confirmPassword, ...userData } = data;
-    const result = await registerUser(userData);
-    setLoading(false);
+    try {
+      const result = await registerUser(userData);
+      console.log('Registration result:', result);
+      setLoading(false);
 
-    if (result.success && onSuccess) {
-      onSuccess();
+      if (result.success && onSuccess) {
+        console.log('Registration successful, navigating to dashboard.');
+        onSuccess();
+      } else {
+        console.log('Registration failed, error message:', result.error);
+      }
+    } catch (error) {
+      console.error('An unexpected error occurred during registration:', error);
+      setAuthError('An unexpected error occurred. Please try again.');
+      setLoading(false);
     }
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="auth-form">
+      {authError && <div className="auth-error-message">{authError}</div>}
       <Input
         label={t('fullName')}
         name="name"

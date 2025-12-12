@@ -9,10 +9,28 @@ const emailService = require('../services/emailService');
 // @desc    Register a new user
 // @access  Public
 router.post('/register', async (req, res) => {
-  const { email, password, fullName, username } = req.body;
+  const {
+    email,
+    password,
+    name, // This maps to fullName in frontend
+    phone,
+    role,
+    agencyName,
+    licenseNumber,
+    agencyAddress,
+    agencyLogo
+  } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({ msg: 'Please enter all fields' });
+  // Basic validation for required fields
+  if (!email || !password || !name || !phone || !role) {
+    return res.status(400).json({ msg: 'Please enter all required fields' });
+  }
+
+  // Additional validation for agent-specific fields
+  if (role === 'agent') {
+    if (!agencyName || !licenseNumber || !agencyAddress) {
+      return res.status(400).json({ msg: 'Agency name, license number, and agency address are required for agents' });
+    }
   }
 
   try {
@@ -26,15 +44,27 @@ router.post('/register', async (req, res) => {
     const verificationTokenHash = crypto.createHash('sha256').update(verificationToken).digest('hex');
 
     // Create new user
-    user = new User({
+    const newUser = {
       email,
       password,
-      fullName: fullName || email.split('@')[0],
-      username: username || email.split('@')[0],
+      fullName: name, // Use 'name' from frontend as fullName
+      username: name, // Use 'name' from frontend as username
+      phone,
+      role,
       emailVerificationToken: verificationTokenHash,
       emailVerificationExpires: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
       isEmailVerified: false
-    });
+    };
+
+    // Add agent specific fields if role is agent
+    if (role === 'agent') {
+      newUser.agencyName = agencyName;
+      newUser.licenseNumber = licenseNumber;
+      newUser.agencyAddress = agencyAddress;
+      newUser.agencyLogo = agencyLogo;
+    }
+
+    user = new User(newUser);
 
     await user.save();
 
@@ -45,6 +75,7 @@ router.post('/register', async (req, res) => {
         user.fullName || user.username,
         verificationToken
       );
+      console.log('Verification email sent successfully to:', user.email);
     } catch (emailError) {
       console.error('Failed to send verification email:', emailError);
       // Continue registration even if email fails
@@ -93,12 +124,12 @@ router.post('/login', async (req, res) => {
   }
 
   try {
-    let user = await User.findByEmail(email);
+    let user = await User.findOne({ email }).select('+password');
     if (!user) {
       return res.status(400).json({ msg: 'Invalid credentials' });
     }
 
-    const isMatch = await User.comparePasswords(password, user.password);
+    const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(400).json({ msg: 'Invalid credentials' });
     }

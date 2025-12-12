@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
-import { PROPERTY_TYPES, LISTING_TYPES, CITIES, KINSHASA_COMMUNES, PRICE_RANGES } from '../../utils/constants';
+import { PROPERTY_TYPES, LISTING_TYPES, CITIES, KINSHASA_COMMUNES } from '../../utils/constants';
 import Button from '../common/Button';
 import './PropertyFilters.css';
 

@@ -6,7 +6,7 @@ import './AddProperty.css';
 
 const AddProperty = () => {
   const navigate = useNavigate();
-  const { user, isAuthenticated, isAgent } = useAuth();
+  const { isAuthenticated, isAgent } = useAuth();
 
   useEffect(() => {
     if (!isAuthenticated) {

@@ -212,9 +212,9 @@ export const PropertyProvider = ({ children }) => {
   // Toggle favorite
   const toggleFavorite = async (id) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/properties/${id}/favorite`);
+      const { data } = await axios.post(`${API_BASE_URL}/properties/${id}/favorite`);
 
-      toast.success(response.data.message || 'Favorite updated!');
+      toast.success(data.message || 'Favorite updated!');
       return { success: true };
     } catch (error) {
       const message = extractErrorMessage(error);

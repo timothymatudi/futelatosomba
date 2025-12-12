@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { toast } from 'react-toastify';
 import { IMAGE_UPLOAD } from '../../utils/constants';
-import { formatFileSize } from '../../utils/formatters';
+
 import './ImageUploader.css';
 
 const ImageUploader = ({ images = [], onImagesChange, maxImages = IMAGE_UPLOAD.MAX_FILES }) => {

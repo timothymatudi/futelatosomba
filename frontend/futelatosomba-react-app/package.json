@@ -2,7 +2,7 @@
   "name": "futelatosomba-react-app",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://localhost:3000",
+  "proxy": "http://localhost:3001",
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
     "@stripe/react-stripe-js": "^5.4.1",
@@ -29,13 +29,19 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "lint": "eslint src --ext .js,.jsx"
   },
   "eslintConfig": {
     "extends": [
       "react-app",
       "react-app/jest"
     ]
+  },
+  "jest": {
+    "moduleNameMapper": {
+      "^react-router-dom$": "react-router-dom"
+    }
   },
   "browserslist": {
     "production": [

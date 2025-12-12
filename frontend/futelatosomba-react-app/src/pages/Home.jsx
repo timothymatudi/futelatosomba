@@ -29,7 +29,7 @@ const Home = () => {
   useEffect(() => {
     fetchProperties();
     fetchOverviewStats(); // Fetch overview stats on component mount
-  }, []); // Empty dependency array means this runs once on mount
+  }, [fetchProperties]); // fetchProperties is a dependency
 
   const handleFilterChange = (newFilters) => {
     updateFilters(newFilters);

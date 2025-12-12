@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -23,11 +23,7 @@ const PropertyDetails = () => {
   const [loading, setLoading] = useState(true);
   const [isFavorited, setIsFavorited] = useState(false);
 
-  useEffect(() => {
-    fetchPropertyDetails();
-  }, [id]);
-
-  const fetchPropertyDetails = async () => {
+  const fetchPropertyDetails = useCallback(async () => {
     try {
       setLoading(true);
       const data = await propertyService.getPropertyById(id);
@@ -44,7 +40,11 @@ const PropertyDetails = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, user, navigate, setIsFavorited]); // Dependencies of fetchPropertyDetails
+
+  useEffect(() => {
+    fetchPropertyDetails();
+  }, [fetchPropertyDetails]); // fetchPropertyDetails is now a stable dependency
 
   const handleFavoriteToggle = async () => {
     if (!user) {
