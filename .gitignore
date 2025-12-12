@@ -35,3 +35,11 @@ coverage/
 
 # System files
 Thumbs.db
+
+# Generated reports and temporary files
+*.md
+*.txt
+*.sh
+frontend/package-lock.json
+backend/scripts/
+vercel.json
