@@ -245,7 +245,7 @@ export const PropertyProvider = ({ children }) => {
   // Contact property owner
   const contactOwner = async (propertyId, name, email, phone, message) => { // Updated parameters
     try {
-      const response = await axios.post(`${API_BASE_URL}/properties/${propertyId}/contact-agent`, { // Updated endpoint
+      await axios.post(`${API_BASE_URL}/properties/${propertyId}/contact-agent`, { // Updated endpoint
         name,
         email,
         phone,
