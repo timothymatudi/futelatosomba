@@ -15,7 +15,7 @@ process.on('unhandledRejection', err => {
 // Ensure environment variables are read.
 require('../config/env');
 
-const jestRunner = require('jest');
+const jest = require('jest');
 const execSync = require('child_process').execSync;
 let argv = process.argv.slice(2);
 
@@ -49,4 +49,4 @@ if (
 }
 
 
-jestRunner.run(argv);
+jest.run(argv);
