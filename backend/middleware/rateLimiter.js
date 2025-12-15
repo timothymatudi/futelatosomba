@@ -37,10 +37,10 @@ const apiLimiter = createLimiterWithLogging({
     skipFailedRequests: false,
 }, 'General API');
 
-// Strict rate limiter for authentication endpoints - 5 requests per 15 minutes
+// Strict rate limiter for authentication endpoints - 50 requests per 15 minutes (increased for testing)
 const authLimiter = createLimiterWithLogging({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 5, // Limit each IP to 5 requests per windowMs
+    max: 50, // Limit each IP to 50 requests per windowMs (increased from 5 for development)
     message: 'Too many authentication attempts from this IP, please try again after 15 minutes',
     standardHeaders: true,
     legacyHeaders: false,

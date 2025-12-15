@@ -1,6 +1,6 @@
 // Application constants for futelatosomba platform
 
-export const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+export const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://futelatosomba-ldho.onrender.com/api';
 
 export const PROPERTY_TYPES = {
   HOUSE: 'house',

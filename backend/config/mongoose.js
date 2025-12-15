@@ -18,8 +18,11 @@ const connectDB = async () => {
     console.error('❌ MongoDB Connection Error:');
     console.error('Error message:', err.message);
     console.error('Error name:', err.name);
+    console.error('⚠️  SERVER CONTINUING WITHOUT DATABASE');
+    console.error('⚠️  Registration will not work until MongoDB is fixed');
     console.error('==========================================');
-    process.exit(1);
+    // Don't exit - allow server to run for frontend testing
+    // process.exit(1);
   }
 };
 

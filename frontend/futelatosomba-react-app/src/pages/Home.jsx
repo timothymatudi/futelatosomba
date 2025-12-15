@@ -93,7 +93,7 @@ const Home = () => {
               <div className="stat-label">Listings</div> {/* Changed from Agents to Listings */}
             </div>
             <div className="stat-item">
-              <div className="stat-value">{overviewStats ? overviewStats.cities.length : '...'}</div>
+              <div className="stat-value">{overviewStats && overviewStats.cities ? overviewStats.cities.length : '...'}</div>
               <div className="stat-label">Cities</div>
             </div>
           </div>
@@ -117,11 +117,11 @@ const Home = () => {
           />
 
           <PropertyList
-            properties={properties.slice(0, 12)}
+            properties={ (properties || []).slice(0, 12) }
             loading={loading}
           />
 
-          {properties.length > 12 && (
+          {(properties || []).length > 12 && (
             <div className="view-all-container">
               <Button variant="primary" size="large" onClick={() => navigate('/properties')}>
                 View All Properties

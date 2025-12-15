@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form'; // Add 'watch' here
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import Input from '../common/Input';
@@ -34,7 +35,8 @@ const registerSchema = yup.object().shape({
     is: 'agent',
     then: (schema) => schema.required('Agency address is required for agents')
   }),
-  agencyLogo: yup.string().url('Must be a valid URL').optional() // Optional for agents
+  agencyLogo: yup.string().url('Must be a valid URL').optional(), // Optional for agents
+  termsAccepted: yup.boolean().oneOf([true], 'You must accept the terms and conditions')
 });
 
 const RegisterForm = ({ onSuccess }) => {
@@ -114,19 +116,20 @@ const RegisterForm = ({ onSuccess }) => {
       />
 
       <div className="input-wrapper">
-        <label className="input-label">
-          Account Type<span className="input-required">*</span>
-        </label>
-        <select
-          {...register('role')}
-          className="input-field"
-          disabled={loading}
-        >
-          <option value="user">Property Seeker</option>
-          <option value="agent">Agent/Property Owner</option>
-        </select>
-        {errors.role && <span className="input-error-message">{errors.role.message}</span>}
-      </div>
+              <div className="input-wrapper">
+                <label className="input-label">
+                  Account Type<span className="input-required">*</span>
+                </label>
+                <select
+                  {...register('role')}
+                  className="input-field"
+                  disabled={loading}
+                >
+                  <option value="user">Property Seeker</option>
+                  <option value="agent">Agent/Property Owner</option>
+                </select>
+                {errors.role && <span className="input-error-message">{errors.role.message}</span>}
+              </div>      </div>
 
       {/* Conditionally render agent fields */}
       {role === 'agent' && (
@@ -188,6 +191,28 @@ const RegisterForm = ({ onSuccess }) => {
         required
         disabled={loading}
       />
+
+      <div className="input-wrapper">
+        <div className="checkbox-container">
+          <input
+            type="checkbox"
+            id="termsAccepted"
+            {...register('termsAccepted')}
+            disabled={loading}
+          />
+          <label htmlFor="termsAccepted" className="checkbox-label">
+            I accept the{' '}
+            <Link to="/terms" className="auth-link">
+              Terms and Conditions
+            </Link>
+          </label>
+        </div>
+        {errors.termsAccepted && (
+          <span className="input-error-message">
+            {errors.termsAccepted.message}
+          </span>
+        )}
+      </div>
 
       <Button type="submit" variant="primary" fullWidth loading={loading}>
         {t('register')}

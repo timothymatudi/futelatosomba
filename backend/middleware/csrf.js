@@ -41,8 +41,8 @@ const generateCsrfToken = (req, res, next) => {
         // Set the token in a cookie
         res.cookie(CSRF_COOKIE_NAME, token, {
             httpOnly: false, // Must be readable by client JavaScript
-            secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-            sameSite: 'strict', // Prevent CSRF by not sending cookie on cross-site requests
+            secure: process.env.NODE_ENV === 'production' ? true : false, // In production, must be true. In dev, can be false for HTTP.
+            sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'None', // Always 'None' for cross-site cookie in this context
             maxAge: COOKIE_MAX_AGE,
             path: '/'
         });
@@ -75,6 +75,10 @@ const validateCsrfToken = (req, res, next) => {
     // Get token from cookie and header
     const cookieToken = req.cookies && req.cookies[CSRF_COOKIE_NAME];
     const headerToken = req.headers[CSRF_HEADER_NAME] || req.body?._csrf;
+
+    console.log(`[CSRF Backend] Validating CSRF for ${req.method} ${req.originalUrl}`);
+    console.log(`[CSRF Backend] Cookie Token: ${cookieToken ? '*****' : 'MISSING'}`);
+    console.log(`[CSRF Backend] Header Token: ${headerToken ? '*****' : 'MISSING'}`);
 
     // Check if tokens exist
     if (!cookieToken) {

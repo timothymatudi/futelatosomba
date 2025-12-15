@@ -1,8 +1,9 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import axios from 'axios';
 import { toast } from 'react-toastify';
-import { API_BASE_URL, LOCAL_STORAGE_KEYS } from '../utils/constants';
+import api from '../services/api'; // Use configured api instance instead of raw axios
+import { LOCAL_STORAGE_KEYS } from '../utils/constants';
 import { extractErrorMessage } from '../utils/formatters';
+import { fetchCsrfToken } from '../utils/csrf';
 
 const AuthContext = createContext(null);
 
@@ -20,10 +21,13 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Initialize auth state from localStorage
+  // Initialize auth state from localStorage and fetch CSRF token
   useEffect(() => {
-    const initAuth = () => {
+    const initAuth = async () => {
       try {
+        // Fetch CSRF token on app initialization
+        await fetchCsrfToken();
+
         const storedToken = localStorage.getItem(LOCAL_STORAGE_KEYS.TOKEN);
         const storedUser = localStorage.getItem(LOCAL_STORAGE_KEYS.USER);
 
@@ -33,8 +37,8 @@ export const AuthProvider = ({ children }) => {
           setUser(parsedUser);
           setIsAuthenticated(true);
 
-          // Set axios default header
-          axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+          // Set api default header
+          api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
@@ -54,7 +58,7 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(false);
     localStorage.removeItem(LOCAL_STORAGE_KEYS.TOKEN);
     localStorage.removeItem(LOCAL_STORAGE_KEYS.USER);
-    delete axios.defaults.headers.common['Authorization'];
+    delete api.defaults.headers.common['Authorization'];
   };
 
   // Login function
@@ -62,7 +66,7 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
 
-      const response = await axios.post(`${API_BASE_URL}/auth/login`, {
+      const response = await api.post('/auth/login', {
         email,
         password
       });
@@ -78,8 +82,8 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem(LOCAL_STORAGE_KEYS.TOKEN, newToken);
       localStorage.setItem(LOCAL_STORAGE_KEYS.USER, JSON.stringify(userData));
 
-      // Set axios default header
-      axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+      // Set api default header
+      api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
 
       toast.success('Login successful!');
       return { success: true, user: userData };
@@ -97,7 +101,7 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
 
-      const response = await axios.post(`${API_BASE_URL}/auth/register`, userData);
+      const response = await api.post('/auth/register', userData);
 
       const { token: newToken, user: newUser } = response.data;
 
@@ -110,8 +114,8 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem(LOCAL_STORAGE_KEYS.TOKEN, newToken);
       localStorage.setItem(LOCAL_STORAGE_KEYS.USER, JSON.stringify(newUser));
 
-      // Set axios default header
-      axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+      // Set api default header
+      api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
 
       toast.success('Registration successful!');
       return { success: true, user: newUser };
@@ -135,7 +139,7 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
 
-      const response = await axios.put(`${API_BASE_URL}/auth/profile`, updates);
+      const response = await api.put('/auth/profile', updates);
 
       const updatedUser = response.data.user;
 
@@ -158,7 +162,7 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
 
-      await axios.post(`${API_BASE_URL}/auth/change-password`, {
+      await api.post('/auth/change-password', {
         currentPassword,
         newPassword
       });
@@ -179,7 +183,7 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
 
-      await axios.post(`${API_BASE_URL}/auth/forgot-password`, { email });
+      await api.post('/auth/forgot-password', { email });
 
       toast.success('Password reset link sent to your email!');
       return { success: true };

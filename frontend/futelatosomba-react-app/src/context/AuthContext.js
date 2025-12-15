@@ -7,8 +7,22 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null); // Correct single instance of error state
+  const [csrfToken, setCsrfToken] = useState(null);
 
   useEffect(() => {
+    const fetchCsrfToken = async () => {
+      try {
+        const response = await fetch('/api/csrf-token');
+        const data = await response.json();
+        setCsrfToken(data.csrfToken);
+      } catch (err) {
+        console.error('Error fetching CSRF token:', err);
+        setError('Could not connect to the server. Please try again later.');
+      }
+    };
+
+    fetchCsrfToken();
+    
     const checkLoggedIn = async () => {
       const token = localStorage.getItem('token');
       if (token) {
@@ -40,13 +54,19 @@ export const AuthProvider = ({ children }) => {
   const login = async (emailOrUsername, password) => {
     setLoading(true);
     try {
-      const response = await fetch('/api/users/login', {
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'x-csrf-token': csrfToken
         },
         body: JSON.stringify({ username: emailOrUsername, password })
       });
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        throw new Error(`Server returned non-JSON response: ${text}`);
+      }
       const data = await response.json();
 
       if (!response.ok) {
@@ -94,24 +114,34 @@ export const AuthProvider = ({ children }) => {
         })
       };
 
-      const response = await fetch('/api/users/register', {
+      const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'x-csrf-token': csrfToken
         },
         body: JSON.stringify(payload)
       });
-      const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Registration failed');
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        throw new Error(`Server returned non-JSON response: ${text}`);
       }
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.msg || 'Registration failed');
+      }
+      
+      const data = await response.json();
 
       localStorage.setItem('token', data.token);
       setUser(data.user);
       setError(null);
       return { success: true, user: data.user };
     } catch (err) {
+      console.error('Registration error:', err);
       setError(err.message);
       return { success: false, error: err.message };
     } finally {

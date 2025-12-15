@@ -39,6 +39,13 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ msg: 'User already exists' });
     }
 
+    if (role === 'agent') {
+      let agent = await User.findOne({ licenseNumber });
+      if (agent) {
+        return res.status(400).json({ msg: 'License number already in use' });
+      }
+    }
+
     // Generate email verification token
     const verificationToken = crypto.randomBytes(32).toString('hex');
     const verificationTokenHash = crypto.createHash('sha256').update(verificationToken).digest('hex');
@@ -48,7 +55,7 @@ router.post('/register', async (req, res) => {
       email,
       password,
       fullName: name, // Use 'name' from frontend as fullName
-      username: name, // Use 'name' from frontend as username
+      username: email.split('@')[0] + Math.floor(Math.random() * 10000),
       phone,
       role,
       emailVerificationToken: verificationTokenHash,

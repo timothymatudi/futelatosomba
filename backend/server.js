@@ -19,6 +19,7 @@ const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 
 // Import security middleware
+const csurf = require('csurf');
 const {
     apiLimiter,
     authLimiter,
@@ -32,11 +33,8 @@ const {
     sanitizeMongoQuery,
     validatePaymentAmount
 } = require('./middleware/validation');
-const {
-    generateCsrfToken,
-    validateCsrfToken,
-    getCsrfToken
-} = require('./middleware/csrf');
+
+const csrfProtection = csurf({ cookie: true });
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -147,39 +145,19 @@ app.use(sanitizeQueryParams);
 // 6. NoSQL injection protection
 app.use(sanitizeMongoQuery);
 
-// 7. Generate CSRF token for all requests
-app.use(generateCsrfToken);
-
 // Serve static files from frontend production build
 app.use(express.static('../frontend/futelatosomba-react-app/build'));
 
 // Serve uploaded files
 app.use('/uploads', express.static('uploads'));
 
-// CSRF token endpoint - must come before validateCsrfToken middleware
-app.get('/api/csrf-token', getCsrfToken);
+app.get('/api/csrf-token', csrfProtection, (req, res) => {
+  res.json({ csrfToken: req.csrfToken() });
+});
 
 // Health check endpoint (no rate limiting or CSRF protection)
 app.get('/api/health', (req, res) => {
     res.json({ status: 'OK', message: 'Server is running' });
-});
-
-// Apply CSRF validation to all API routes except webhooks
-app.use('/api', (req, res, next) => {
-    // Skip CSRF in production for now (will implement properly with SameSite cookies later)
-    if (process.env.NODE_ENV === 'production') {
-        return next();
-    }
-
-    // Skip CSRF for webhook endpoints (they use their own verification)
-    if (req.path.startsWith('/webhook')) {
-        return next();
-    }
-    // Skip for GET requests and health check
-    if (req.method === 'GET' || req.path === '/health' || req.path === '/csrf-token') {
-        return next();
-    }
-    validateCsrfToken(req, res, next);
 });
 
 // API Routes with rate limiting
@@ -194,13 +172,13 @@ app.get('/api/health', (req, res) => {
 });
 
 // Authentication routes - strict rate limiting
-app.use('/api/auth', authLimiter, authRoutes);
+app.use('/api/auth', authLimiter, csrfProtection, authRoutes);
 
 // Property routes - general API rate limiting
 app.use('/api/properties', apiLimiter, propertyRoutes);
 
 // User routes - general API rate limiting
-app.use('/api/users', apiLimiter, userRoutes);
+app.use('/api/users', apiLimiter, csrfProtection, userRoutes);
 
 // Admin routes - general API rate limiting
 app.use('/api/admin', apiLimiter, adminRoutes);
@@ -438,7 +416,7 @@ app.use((req, res) => {
 
 // Start server (only in non-serverless environment)
 if (process.env.VERCEL !== '1') {
-    app.listen(PORT, () => {
+    app.listen(PORT, '0.0.0.0', () => {
         console.log('='.repeat(60));
         console.log('  FUTELATOSOMBA BACKEND SERVER');
         console.log('='.repeat(60));
