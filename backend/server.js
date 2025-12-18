@@ -155,11 +155,6 @@ app.get('/api/csrf-token', csrfProtection, (req, res) => {
   res.json({ csrfToken: req.csrfToken() });
 });
 
-// Health check endpoint (no rate limiting or CSRF protection)
-app.get('/api/health', (req, res) => {
-    res.json({ status: 'OK', message: 'Server is running' });
-});
-
 // API Routes with rate limiting
 
 // Health check endpoint (no rate limiting)
