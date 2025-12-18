@@ -171,8 +171,8 @@ app.get('/api/health', (req, res) => {
     });
 });
 
-// Authentication routes - strict rate limiting
-app.use('/api/auth', authLimiter, csrfProtection, authRoutes);
+// Authentication routes
+app.use('/api/auth', authRoutes);
 
 // Property routes - general API rate limiting
 app.use('/api/properties', apiLimiter, propertyRoutes);
@@ -186,7 +186,7 @@ app.use('/api/admin', apiLimiter, adminRoutes);
 // Payment Endpoints with rate limiting and validation
 
 // Create donation payment intent
-app.post('/api/create-donation-payment', paymentLimiter, validatePaymentAmount, async (req, res) => {
+app.post('/api/create-donation-payment', [paymentLimiter, ...validatePaymentAmount], async (req, res) => {
     try {
         const { amount } = req.body;
 
@@ -231,7 +231,7 @@ app.post('/api/create-donation-payment', paymentLimiter, validatePaymentAmount, 
 });
 
 // Create premium listing checkout session
-app.post('/api/create-premium-checkout', paymentLimiter, validatePaymentAmount, async (req, res) => {
+app.post('/api/create-premium-checkout', [paymentLimiter, ...validatePaymentAmount], async (req, res) => {
     try {
         const { amount } = req.body;
 

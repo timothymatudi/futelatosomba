@@ -102,6 +102,7 @@ const translations = {
     registerSuccess: 'Registration successful!',
     updateSuccess: 'Updated successfully!',
     deleteSuccess: 'Deleted successfully!',
+    welcomeUser: 'Welcome, {name}!',
 
     // Footer
     allRightsReserved: 'All rights reserved',
@@ -211,6 +212,7 @@ const translations = {
     registerSuccess: 'Inscription réussie!',
     updateSuccess: 'Mis à jour avec succès!',
     deleteSuccess: 'Supprimé avec succès!',
+    welcomeUser: 'Bienvenue, {name}!',
 
     // Footer
     allRightsReserved: 'Tous droits réservés',
@@ -320,6 +322,7 @@ const translations = {
     registerSuccess: 'Komikoma malamu!',
     updateSuccess: 'Kobongola malamu!',
     deleteSuccess: 'Kolongola malamu!',
+    welcomeUser: 'Boyei Malamu, {name}!',
 
     // Footer
     allRightsReserved: 'Makoki nyonso ebombami',

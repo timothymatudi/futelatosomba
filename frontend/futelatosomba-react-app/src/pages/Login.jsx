@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { useLanguage } from '../context/LanguageContext';
 import LoginForm from '../components/auth/LoginForm';
 import './AuthPages.css';
@@ -11,7 +12,9 @@ const Login = () => {
 
   const from = location.state?.from?.pathname || '/dashboard';
 
-  const handleSuccess = () => {
+  const handleSuccess = (user) => {
+    const userName = user?.fullName || user?.name || user?.email?.split('@')[0] || 'User';
+    toast.success(t('welcomeUser', { name: userName }));
     navigate(from, { replace: true });
   };
 

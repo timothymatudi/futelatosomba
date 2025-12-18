@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { useLanguage } from '../context/LanguageContext';
 import RegisterForm from '../components/auth/RegisterForm';
 import './AuthPages.css';
@@ -8,7 +9,9 @@ const Register = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
 
-  const handleSuccess = () => {
+  const handleSuccess = (user) => {
+    const userName = user?.fullName || user?.name || user?.email?.split('@')[0] || 'User';
+    toast.success(t('welcomeUser', { name: userName }));
     navigate('/dashboard', { replace: true });
   };
 

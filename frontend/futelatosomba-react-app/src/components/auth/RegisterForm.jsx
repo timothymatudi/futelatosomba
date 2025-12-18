@@ -40,15 +40,16 @@ const registerSchema = yup.object().shape({
 });
 
 const RegisterForm = ({ onSuccess }) => {
-  const { register: registerUser, error: authError, setError: setAuthError } = useAuth();
+  const { register: registerUser } = useAuth();
   const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
+  const [authError, setAuthError] = useState(null);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-    watch // Destructure watch from useForm
+    watch
   } = useForm({
     resolver: yupResolver(registerSchema),
     defaultValues: {
@@ -56,7 +57,7 @@ const RegisterForm = ({ onSuccess }) => {
     }
   });
 
-  const role = watch('role'); // Watch the role field
+  const role = watch('role');
 
   const onSubmit = async (data) => {
     console.log('Submitting registration form with data:', data);
@@ -70,9 +71,10 @@ const RegisterForm = ({ onSuccess }) => {
 
       if (result.success && onSuccess) {
         console.log('Registration successful, navigating to dashboard.');
-        onSuccess();
+        onSuccess(result.user);
       } else {
         console.log('Registration failed, error message:', result.error);
+        setAuthError(result.error || 'Registration failed. Please try again.');
       }
     } catch (error) {
       console.error('An unexpected error occurred during registration:', error);
@@ -116,20 +118,19 @@ const RegisterForm = ({ onSuccess }) => {
       />
 
       <div className="input-wrapper">
-              <div className="input-wrapper">
-                <label className="input-label">
-                  Account Type<span className="input-required">*</span>
-                </label>
-                <select
-                  {...register('role')}
-                  className="input-field"
-                  disabled={loading}
-                >
-                  <option value="user">Property Seeker</option>
-                  <option value="agent">Agent/Property Owner</option>
-                </select>
-                {errors.role && <span className="input-error-message">{errors.role.message}</span>}
-              </div>      </div>
+        <label className="input-label">
+          Account Type<span className="input-required">*</span>
+        </label>
+        <select
+          {...register('role')}
+          className="input-field"
+          disabled={loading}
+        >
+          <option value="user">Property Seeker</option>
+          <option value="agent">Agent/Property Owner</option>
+        </select>
+        {errors.role && <span className="input-error-message">{errors.role.message}</span>}
+      </div>
 
       {/* Conditionally render agent fields */}
       {role === 'agent' && (

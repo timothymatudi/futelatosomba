@@ -32,7 +32,7 @@ const LoginForm = ({ onSuccess }) => {
     setLoading(false);
 
     if (result.success && onSuccess) {
-      onSuccess();
+      onSuccess(result.user);
     }
   };
 

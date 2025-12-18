@@ -1,49 +1,31 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { toast } from 'react-toastify'; // Import toast for notifications
+import api from '../services/api';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null); // Correct single instance of error state
-  const [csrfToken, setCsrfToken] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchCsrfToken = async () => {
-      try {
-        const response = await fetch('/api/csrf-token');
-        const data = await response.json();
-        setCsrfToken(data.csrfToken);
-      } catch (err) {
-        console.error('Error fetching CSRF token:', err);
-        setError('Could not connect to the server. Please try again later.');
-      }
-    };
-
-    fetchCsrfToken();
-    
     const checkLoggedIn = async () => {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('authToken');
       if (token) {
         try {
-          const response = await fetch('/api/users/me', {
-            headers: {
-              'x-auth-token': token
-            }
-          });
-          if (response.ok) {
-            const data = await response.json();
-            setUser(data.user);
+          const response = await api.get('/users/me');
+          if (response.data && response.data.user) {
+            setUser(response.data.user);
           } else {
-            localStorage.removeItem('token');
+            localStorage.removeItem('authToken');
             setUser(null);
           }
         } catch (err) {
           console.error('Error verifying token:', err);
-          localStorage.removeItem('token');
+          localStorage.removeItem('authToken');
           setUser(null);
-          setError(err.message); // Set error here
+          setError(err.message);
         }
       }
       setLoading(false);
@@ -51,32 +33,17 @@ export const AuthProvider = ({ children }) => {
     checkLoggedIn();
   }, []);
 
-  const login = async (emailOrUsername, password) => {
+  const login = async (email, password) => {
     setLoading(true);
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-csrf-token': csrfToken
-        },
-        body: JSON.stringify({ username: emailOrUsername, password })
-      });
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        const text = await response.text();
-        throw new Error(`Server returned non-JSON response: ${text}`);
-      }
-      const data = await response.json();
+      const response = await api.post('/auth/login', { email, password });
+      const token = response.data.token;
+      const userData = response.data.user;
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Login failed');
-      }
-
-      localStorage.setItem('token', data.token);
-      setUser(data.user);
+      localStorage.setItem('authToken', token);
+      setUser(userData);
       setError(null);
-      return { success: true, user: data.user };
+      return { success: true, user: userData };
     } catch (err) {
       setError(err.message);
       return { success: false, error: err.message };
@@ -85,7 +52,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const register = async (userData) => { // Added register function
+  const register = async (userData) => {
     setLoading(true);
     try {
       let firstName = userData.name;
@@ -96,14 +63,10 @@ export const AuthProvider = ({ children }) => {
         lastName = nameParts.slice(1).join(' ');
       }
 
-      const username = userData.email.split('@')[0] + Math.floor(Math.random() * 10000);
-
       const payload = {
-        username: username,
+        name: userData.name,
         email: userData.email,
         password: userData.password,
-        firstName,
-        lastName,
         phone: userData.phone,
         role: userData.role,
         ...(userData.role === 'agent' && {
@@ -114,32 +77,14 @@ export const AuthProvider = ({ children }) => {
         })
       };
 
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-csrf-token': csrfToken
-        },
-        body: JSON.stringify(payload)
-      });
+      const response = await api.post('/auth/register', payload);
+      const token = response.data.token;
+      const registeredUser = response.data.user;
 
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        const text = await response.text();
-        throw new Error(`Server returned non-JSON response: ${text}`);
-      }
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.msg || 'Registration failed');
-      }
-      
-      const data = await response.json();
-
-      localStorage.setItem('token', data.token);
-      setUser(data.user);
+      localStorage.setItem('authToken', token);
+      setUser(registeredUser);
       setError(null);
-      return { success: true, user: data.user };
+      return { success: true, user: registeredUser };
     } catch (err) {
       console.error('Registration error:', err);
       setError(err.message);
@@ -150,7 +95,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem('authToken');
     setUser(null);
     setError(null);
   };

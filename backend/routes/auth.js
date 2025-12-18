@@ -153,7 +153,17 @@ router.post('/login', async (req, res) => {
       { expiresIn: 3600 },
       (err, token) => {
         if (err) throw err;
-        res.json({ token });
+        res.json({
+          token,
+          user: {
+            id: user.id,
+            email: user.email,
+            fullName: user.fullName,
+            username: user.username,
+            role: user.role,
+            isEmailVerified: user.isEmailVerified
+          }
+        });
       }
     );
   } catch (err) {
