@@ -8,7 +8,7 @@ const emailService = require('../services/emailService');
 // @route   POST api/auth/register
 // @desc    Register a new user
 // @access  Public
-router.post('/register', async (req, res) => {
+router.post('/register', async (req, res, next) => {
   const {
     email,
     password,
@@ -51,10 +51,15 @@ router.post('/register', async (req, res) => {
     const verificationTokenHash = crypto.createHash('sha256').update(verificationToken).digest('hex');
 
     // Create new user
+    const nameParts = name.trim().split(' ');
+    const firstName = nameParts[0];
+    const lastName = nameParts.slice(1).join(' ') || '';
+
     const newUser = {
       email,
       password,
-      fullName: name, // Use 'name' from frontend as fullName
+      firstName,
+      lastName,
       username: email.split('@')[0] + Math.floor(Math.random() * 10000),
       phone,
       role,
@@ -77,9 +82,10 @@ router.post('/register', async (req, res) => {
 
     // Send verification email
     try {
+      const fullName = (user.firstName + (user.lastName ? ' ' + user.lastName : '')).trim();
       await emailService.sendVerificationEmail(
         user.email,
-        user.fullName || user.username,
+        fullName || user.username,
         verificationToken
       );
       console.log('Verification email sent successfully to:', user.email);
@@ -99,13 +105,17 @@ router.post('/register', async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '7d' },
       (err, token) => {
-        if (err) throw err;
+        if (err) {
+          console.error('JWT signing error:', err);
+          return res.status(500).json({ msg: 'Error generating token' });
+        }
         res.json({
           token,
           user: {
             id: user.id,
             email: user.email,
-            fullName: user.fullName,
+            firstName: user.firstName,
+            lastName: user.lastName,
             username: user.username,
             role: user.role,
             isEmailVerified: user.isEmailVerified
@@ -115,8 +125,9 @@ router.post('/register', async (req, res) => {
       }
     );
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server error');
+    console.error('Registration error:', err.message);
+    console.error('Full error:', err);
+    res.status(500).json({ msg: 'Server error', error: err.message });
   }
 });
 
@@ -152,13 +163,17 @@ router.post('/login', async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: 3600 },
       (err, token) => {
-        if (err) throw err;
+        if (err) {
+          console.error('JWT signing error:', err);
+          return res.status(500).json({ msg: 'Error generating token' });
+        }
         res.json({
           token,
           user: {
             id: user.id,
             email: user.email,
-            fullName: user.fullName,
+            firstName: user.firstName,
+            lastName: user.lastName,
             username: user.username,
             role: user.role,
             isEmailVerified: user.isEmailVerified
@@ -292,9 +307,10 @@ router.post('/resend-verification', async (req, res) => {
 
     // Send verification email
     try {
+      const fullName = (user.firstName + (user.lastName ? ' ' + user.lastName : '')).trim();
       await emailService.sendVerificationEmail(
         user.email,
-        user.fullName || user.username,
+        fullName || user.username,
         verificationToken
       );
       res.json({ message: 'Verification email sent successfully' });
