@@ -8,6 +8,8 @@ const nextConfig = {
       },
     ],
   },
+  // Force rebuild
+  reactStrictMode: true,
 }
 
 export default nextConfig

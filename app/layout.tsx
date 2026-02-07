@@ -11,14 +11,6 @@ export const metadata: Metadata = {
   title: "Futelatosomba - Find Your Dream Home in DRC",
   description:
     "The leading property platform in the Democratic Republic of Congo. Buy, rent, or sell properties across Kinshasa, Lubumbashi, Goma, and more.",
-  keywords: [
-    "DRC property",
-    "Kinshasa real estate",
-    "Congo homes",
-    "property for sale DRC",
-    "rent apartment Kinshasa",
-    "Futelatosomba",
-  ],
 }
 
 export const viewport: Viewport = {

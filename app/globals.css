@@ -1,27 +1,26 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-background: hsl(0 0% 100%);
-  --color-foreground: hsl(0 0% 8%);
-  --color-card: hsl(0 0% 100%);
-  --color-card-foreground: hsl(0 0% 8%);
-  --color-popover: hsl(0 0% 100%);
-  --color-popover-foreground: hsl(0 0% 8%);
-  --color-primary: hsl(212 100% 50%);
-  --color-primary-foreground: hsl(0 0% 100%);
-  --color-secondary: hsl(45 100% 50%);
-  --color-secondary-foreground: hsl(0 0% 8%);
-  --color-muted: hsl(210 20% 96%);
-  --color-muted-foreground: hsl(215 16% 47%);
-  --color-accent: hsl(354 78% 44%);
-  --color-accent-foreground: hsl(0 0% 100%);
-  --color-destructive: hsl(0 84% 60%);
-  --color-destructive-foreground: hsl(0 0% 100%);
-  --color-border: hsl(220 13% 91%);
-  --color-input: hsl(220 13% 91%);
-  --color-ring: hsl(212 100% 50%);
+  --color-background: oklch(1 0 0);
+  --color-foreground: oklch(0.145 0 0);
+  --color-card: oklch(1 0 0);
+  --color-card-foreground: oklch(0.145 0 0);
+  --color-popover: oklch(1 0 0);
+  --color-popover-foreground: oklch(0.145 0 0);
+  --color-primary: oklch(0.6 0.2 250);
+  --color-primary-foreground: oklch(1 0 0);
+  --color-secondary: oklch(0.85 0.15 85);
+  --color-secondary-foreground: oklch(0.145 0 0);
+  --color-muted: oklch(0.96 0.005 265);
+  --color-muted-foreground: oklch(0.55 0.015 265);
+  --color-accent: oklch(0.5 0.2 25);
+  --color-accent-foreground: oklch(1 0 0);
+  --color-destructive: oklch(0.55 0.2 27);
+  --color-destructive-foreground: oklch(1 0 0);
+  --color-border: oklch(0.92 0.005 265);
+  --color-input: oklch(0.92 0.005 265);
+  --color-ring: oklch(0.6 0.2 250);
   --radius: 0.5rem;
-
   --font-sans: var(--font-sans);
 }
 
