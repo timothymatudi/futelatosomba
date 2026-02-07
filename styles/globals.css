@@ -21,7 +21,7 @@
   --color-input: oklch(0.92 0.005 265);
   --color-ring: oklch(0.6 0.2 250);
   --radius: 0.5rem;
-  --font-sans: var(--font-sans);
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 }
 
 * {
