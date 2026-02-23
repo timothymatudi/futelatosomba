@@ -164,7 +164,7 @@ export const getImageUrl = (imagePath) => {
   }
 
   // Otherwise, construct the URL from the API base
-  const baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+  const baseUrl = process.env.REACT_APP_API_URL || '/api';
   return `${baseUrl}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
 };
 

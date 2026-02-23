@@ -203,11 +203,12 @@ app.use(sanitizeQueryParams);
 // 6. NoSQL injection protection
 app.use(sanitizeMongoQuery);
 
-// Serve static files from frontend production build
-app.use(express.static('../frontend/futelatosomba-react-app/build'));
+// Serve static files from frontend production build (local dev only; Vercel handles this via vercel.json)
+const path = require('path');
+app.use(express.static(path.join(__dirname, '..', 'frontend', 'futelatosomba-react-app', 'build')));
 
 // Serve uploaded files
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // CSRF token generation middleware applied globally (sets cookie on every request)
 app.use(generateCsrfToken);
