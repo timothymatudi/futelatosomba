@@ -4,10 +4,11 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const auth = require('../middleware/auth');
 const User = require('../models/User');
+const Property = require('../models/Property');
 
-// Generate JWT token
+// Generate JWT token (matching auth middleware's expected payload shape: decoded.user.id)
 const generateToken = (userId) => {
-    return jwt.sign({ id: userId }, process.env.JWT_SECRET || 'your-secret-key', {
+    return jwt.sign({ user: { id: userId } }, process.env.JWT_SECRET, {
         expiresIn: '30d'
     });
 };
@@ -169,10 +170,16 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// Update user profile
-router.put('/:id', async (req, res) => {
+// Update user profile (authenticated, own profile only)
+router.put('/:id', auth, async (req, res) => {
     try {
-        const { password, ...updateData } = req.body;
+        // Users can only update their own profile
+        if (req.user.id !== req.params.id) {
+            return res.status(403).json({ error: 'Not authorized to update this profile' });
+        }
+
+        // Strip sensitive fields that users should not self-modify
+        const { password, role, isEmailVerified, resetPasswordToken, emailVerificationToken, ...updateData } = req.body;
 
         const user = await User.findByIdAndUpdate(
             req.params.id,

@@ -176,9 +176,9 @@ const Header = () => {
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
                 >
                   <div className="user-avatar">
-                    {user?.name?.charAt(0).toUpperCase() || 'U'}
+                    {(user?.firstName || user?.name || user?.username || 'U').charAt(0).toUpperCase()}
                   </div>
-                  <span className="user-name">{user?.name}</span>
+                  <span className="user-name">{user?.firstName ? `${user.firstName}${user.lastName ? ' ' + user.lastName : ''}` : (user?.name || user?.username)}</span>
                 </button>
 
                 {userMenuOpen && (

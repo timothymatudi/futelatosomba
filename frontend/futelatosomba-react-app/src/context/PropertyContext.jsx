@@ -68,11 +68,12 @@ export const PropertyProvider = ({ children }) => {
       const response = await api.get('/properties', { params });
 
       setProperties(response.data.properties || response.data.data || []);
+      const pag = response.data.pagination || {};
       setPagination({
-        page: response.data.page || page,
-        limit: response.data.limit || pagination.limit,
-        total: response.data.total || 0,
-        pages: response.data.pages || Math.ceil((response.data.total || 0) / pagination.limit)
+        page: pag.currentPage || response.data.page || page,
+        limit: pag.itemsPerPage || response.data.limit || pagination.limit,
+        total: pag.totalItems || response.data.total || 0,
+        pages: pag.totalPages || response.data.pages || Math.ceil((pag.totalItems || response.data.total || 0) / pagination.limit)
       });
 
       return { success: true };

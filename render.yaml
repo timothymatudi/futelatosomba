@@ -11,9 +11,9 @@ services:
       - key: PORT
         value: 10000
       - key: MONGO_DATABASE_URL
-        value: "mongodb+srv://timomatudi_db_user:LUBUZi1044%40%29@cluster0.iuhojxz.mongodb.net/futelatosomba"
+        sync: false  # Set in Render dashboard - never commit credentials to Git
       - key: JWT_SECRET
-        value: futelatosomba_super_secure_jwt_secret_key_2024_production_v1
+        sync: false  # Set in Render dashboard - never commit credentials to Git
       - key: STRIPE_SECRET_KEY
         sync: false
       - key: STRIPE_PUBLISHABLE_KEY

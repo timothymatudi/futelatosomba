@@ -617,6 +617,127 @@ router.get('/', async (req, res) => {
     }
 });
 
+// Get property statistics (MUST be before /:id to avoid route conflicts)
+router.get('/stats/overview', async (req, res) => {
+    try {
+        const stats = await Property.aggregate([
+            {
+                $group: {
+                    _id: null,
+                    totalProperties: { $sum: 1 },
+                    forSale: {
+                        $sum: { $cond: [{ $eq: ['$listingType', 'sale'] }, 1, 0] }
+                    },
+                    forRent: {
+                        $sum: { $cond: [{ $eq: ['$listingType', 'rent'] }, 1, 0] }
+                    },
+                    premium: {
+                        $sum: { $cond: [{ $eq: ['$isPremium', true] }, 1, 0] }
+                    },
+                    avgPriceSale: {
+                        $avg: { $cond: [{ $eq: ['$listingType', 'sale'] }, '$price', null] }
+                    },
+                    avgPriceRent: {
+                        $avg: { $cond: [{ $eq: ['$listingType', 'rent'] }, '$price', null] }
+                    },
+                    cities: { $addToSet: '$location.city' },
+                    propertyTypes: { $addToSet: '$propertyType' }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    totalProperties: 1,
+                    forSale: 1,
+                    forRent: 1,
+                    premium: 1,
+                    avgPrice: {
+                        sale: { $round: ['$avgPriceSale'] },
+                        rent: { $round: ['$avgPriceRent'] }
+                    },
+                    cities: 1,
+                    propertyTypes: 1
+                }
+            }
+        ]);
+
+        res.json(stats[0] || {});
+    } catch (error) {
+        console.error('Error fetching stats:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get average price per property type in a city
+router.get('/stats/average-price-by-type', async (req, res) => {
+    try {
+        const { city } = req.query;
+        if (!city) {
+            return res.status(400).json({ error: 'City query parameter is required.' });
+        }
+
+        const stats = await Property.aggregate([
+            { $match: { 'location.city': new RegExp(city, 'i'), listingType: 'sale' } },
+            {
+                $group: {
+                    _id: '$propertyType',
+                    averagePrice: { $avg: '$price' },
+                    count: { $sum: 1 }
+                }
+            },
+            { $sort: { _id: 1 } },
+            {
+                $project: {
+                    _id: 0,
+                    propertyType: '$_id',
+                    averagePrice: { $round: ['$averagePrice'] },
+                    count: 1
+                }
+            }
+        ]);
+
+        res.json(stats);
+    } catch (error) {
+        console.error('Error fetching average price by property type:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get average price per bedroom count in a specific city
+router.get('/stats/average-price-by-bedrooms', async (req, res) => {
+    try {
+        const { city } = req.query;
+        if (!city) {
+            return res.status(400).json({ error: 'City query parameter is required.' });
+        }
+
+        const stats = await Property.aggregate([
+            { $match: { 'location.city': new RegExp(city, 'i'), bedrooms: { $gte: 0 }, listingType: 'sale' } },
+            {
+                $group: {
+                    _id: '$bedrooms',
+                    averagePrice: { $avg: '$price' },
+                    count: { $sum: 1 }
+                }
+            },
+            { $sort: { _id: 1 } },
+            {
+                $project: {
+                    _id: 0,
+                    bedrooms: '$_id',
+                    averagePrice: { $round: ['$averagePrice'] },
+                    count: 1
+                }
+            }
+        ]);
+
+        res.json(stats);
+    } catch (error) {
+        console.error('Error fetching average price by bedrooms:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Get single property by ID
 router.get('/:id', async (req, res) => {
     try {
@@ -878,126 +999,7 @@ router.delete('/:id', agentAuth, async (req, res) => {
     }
 });
 
-// Get property statistics
-router.get('/stats/overview', async (req, res) => {
-    try {
-        const stats = await Property.aggregate([
-            {
-                $group: {
-                    _id: null, // Group all documents
-                    totalProperties: { $sum: 1 },
-                    forSale: {
-                        $sum: { $cond: [{ $eq: ['$listingType', 'sale'] }, 1, 0] }
-                    },
-                    forRent: {
-                        $sum: { $cond: [{ $eq: ['$listingType', 'rent'] }, 1, 0] }
-                    },
-                    premium: {
-                        $sum: { $cond: [{ $eq: ['$isPremium', true] }, 1, 0] }
-                    },
-                    avgPriceSale: {
-                        $avg: { $cond: [{ $eq: ['$listingType', 'sale'] }, '$price', null] }
-                    },
-                    avgPriceRent: {
-                        $avg: { $cond: [{ $eq: ['$listingType', 'rent'] }, '$price', null] }
-                    },
-                    cities: { $addToSet: '$location.city' }, // Get unique cities
-                    propertyTypes: { $addToSet: '$propertyType' } // Get unique property types
-                }
-            },
-            {
-                $project: {
-                    _id: 0,
-                    totalProperties: 1,
-                    forSale: 1,
-                    forRent: 1,
-                    premium: 1,
-                    avgPrice: {
-                        sale: { $round: ['$avgPriceSale'] },
-                        rent: { $round: ['$avgPriceRent'] }
-                    },
-                    cities: 1,
-                    propertyTypes: 1
-                }
-            }
-        ]);
 
-        res.json(stats[0] || {}); // Return the first (and only) result, or empty object if no properties
-    } catch (error) {
-        console.error('Error fetching stats:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Get average price per property type in a city
-router.get('/stats/average-price-by-type', async (req, res) => {
-    try {
-        const { city } = req.query;
-        if (!city) {
-            return res.status(400).json({ error: 'City query parameter is required.' });
-        }
-
-        const stats = await Property.aggregate([
-            { $match: { 'location.city': new RegExp(city, 'i'), listingType: 'sale' } }, // Only consider 'sale' properties for average price
-            {
-                $group: {
-                    _id: '$propertyType',
-                    averagePrice: { $avg: '$price' },
-                    count: { $sum: 1 }
-                }
-            },
-            { $sort: { _id: 1 } },
-            {
-                $project: {
-                    _id: 0,
-                    propertyType: '$_id',
-                    averagePrice: { $round: ['$averagePrice'] },
-                    count: 1
-                }
-            }
-        ]);
-
-        res.json(stats);
-    } catch (error) {
-        console.error('Error fetching average price by property type:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Get average price per bedroom count in a specific city
-router.get('/stats/average-price-by-bedrooms', async (req, res) => {
-    try {
-        const { city } = req.query;
-        if (!city) {
-            return res.status(400).json({ error: 'City query parameter is required.' });
-        }
-
-        const stats = await Property.aggregate([
-            { $match: { 'location.city': new RegExp(city, 'i'), bedrooms: { $gte: 0 }, listingType: 'sale' } },
-            {
-                $group: {
-                    _id: '$bedrooms',
-                    averagePrice: { $avg: '$price' },
-                    count: { $sum: 1 }
-                }
-            },
-            { $sort: { _id: 1 } },
-            {
-                $project: {
-                    _id: 0,
-                    bedrooms: '$_id',
-                    averagePrice: { $round: ['$averagePrice'] },
-                    count: 1
-                }
-            }
-        ]);
-
-        res.json(stats);
-    } catch (error) {
-        console.error('Error fetching average price by bedrooms:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
 
 // Favorite a property
 router.post('/:id/favorite', auth, async (req, res) => {

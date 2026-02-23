@@ -135,7 +135,63 @@ app.use(cors({
 // 3. Cookie parser (required for CSRF protection)
 app.use(cookieParser());
 
-// 4. Body parsing middleware
+// 4a. Stripe webhook endpoint MUST be registered before body parsing middleware
+// because it needs the raw body for signature verification
+app.post('/api/webhook', bodyParser.raw({ type: 'application/json' }), async (req, res) => {
+    const sig = req.headers['stripe-signature'];
+    let event;
+
+    try {
+        event = stripe.webhooks.constructEvent(
+            req.body,
+            sig,
+            process.env.STRIPE_WEBHOOK_SECRET
+        );
+    } catch (err) {
+        console.error('[SECURITY] Webhook signature verification failed:', err.message);
+        return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    // Log webhook event for security monitoring
+    console.log(`[WEBHOOK] Received event: ${event.type}, ID: ${event.id}, Time: ${new Date().toISOString()}`);
+
+    // Handle the event
+    switch (event.type) {
+        case 'payment_intent.succeeded':
+            const paymentIntent = event.data.object;
+            console.log('[PAYMENT] PaymentIntent succeeded:', paymentIntent.id);
+
+            // Update donation status in database
+            await Donation.findOneAndUpdate(
+                { stripePaymentIntentId: paymentIntent.id },
+                { status: 'succeeded', receiptUrl: paymentIntent.charges?.data[0]?.receipt_url }
+            );
+            break;
+
+        case 'checkout.session.completed':
+            const session = event.data.object;
+            console.log('[PAYMENT] Checkout session completed:', session.id);
+
+            // Update transaction status in database
+            await Transaction.findOneAndUpdate(
+                { stripeSessionId: session.id },
+                { status: 'succeeded', completedAt: new Date() }
+            );
+            break;
+
+        case 'payment_intent.payment_failed':
+            const failedPayment = event.data.object;
+            console.warn('[PAYMENT] Payment failed:', failedPayment.id, 'Reason:', failedPayment.last_payment_error?.message);
+            break;
+
+        default:
+            console.log(`[WEBHOOK] Unhandled event type ${event.type}`);
+    }
+
+    res.json({ received: true });
+});
+
+// 4b. Body parsing middleware (after webhook route)
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -270,61 +326,7 @@ app.post('/api/create-premium-checkout', [paymentLimiter, ...validatePaymentAmou
     }
 });
 
-// Webhook endpoint for Stripe events (no CSRF protection, uses Stripe signature verification)
-app.post('/api/webhook', bodyParser.raw({ type: 'application/json' }), async (req, res) => {
-    const sig = req.headers['stripe-signature'];
-    let event;
-
-    try {
-        event = stripe.webhooks.constructEvent(
-            req.body,
-            sig,
-            process.env.STRIPE_WEBHOOK_SECRET
-        );
-    } catch (err) {
-        console.error('[SECURITY] Webhook signature verification failed:', err.message);
-        return res.status(400).send(`Webhook Error: ${err.message}`);
-    }
-
-    // Log webhook event for security monitoring
-    console.log(`[WEBHOOK] Received event: ${event.type}, ID: ${event.id}, Time: ${new Date().toISOString()}`);
-
-    // Handle the event
-    switch (event.type) {
-        case 'payment_intent.succeeded':
-            const paymentIntent = event.data.object;
-            console.log('[PAYMENT] PaymentIntent succeeded:', paymentIntent.id);
-
-            // Update donation status in database
-            await Donation.findOneAndUpdate(
-                { stripePaymentIntentId: paymentIntent.id },
-                { status: 'succeeded', receiptUrl: paymentIntent.charges?.data[0]?.receipt_url }
-            );
-            break;
-
-        case 'checkout.session.completed':
-            const session = event.data.object;
-            console.log('[PAYMENT] Checkout session completed:', session.id);
-
-            // Update transaction status in database
-            await Transaction.findOneAndUpdate(
-                { stripeSessionId: session.id },
-                { status: 'succeeded', completedAt: new Date() }
-            );
-            break;
-
-        case 'payment_intent.payment_failed':
-            const failedPayment = event.data.object;
-            console.warn('[PAYMENT] Payment failed:', failedPayment.id, 'Reason:', failedPayment.last_payment_error?.message);
-            // Handle failed payment
-            break;
-
-        default:
-            console.log(`[WEBHOOK] Unhandled event type ${event.type}`);
-    }
-
-    res.json({ received: true });
-});
+// Webhook endpoint is registered before body parsing middleware (see above)
 
 // Get payment status (with rate limiting)
 app.get('/api/payment-status/:paymentIntentId', apiLimiter, async (req, res) => {

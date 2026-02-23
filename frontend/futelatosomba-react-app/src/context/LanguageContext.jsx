@@ -77,6 +77,10 @@ const translations = {
     forgotPassword: 'Forgot Password?',
     dontHaveAccount: "Don't have an account?",
     alreadyHaveAccount: 'Already have an account?',
+    agencyName: 'Agency Name',
+    licenseNumber: 'License Number',
+    agencyAddress: 'Agency Address',
+    agencyLogo: 'Agency Logo URL',
 
     // Dashboard
     profile: 'Profile',
@@ -187,6 +191,10 @@ const translations = {
     forgotPassword: 'Mot de passe oublié?',
     dontHaveAccount: "Vous n'avez pas de compte?",
     alreadyHaveAccount: 'Vous avez déjà un compte?',
+    agencyName: "Nom de l'Agence",
+    licenseNumber: 'Numéro de Licence',
+    agencyAddress: "Adresse de l'Agence",
+    agencyLogo: "Logo de l'Agence (URL)",
 
     // Dashboard
     profile: 'Profil',
@@ -297,6 +305,10 @@ const translations = {
     forgotPassword: 'Obosani Mot de Passe?',
     dontHaveAccount: 'Ozali na Compte te?',
     alreadyHaveAccount: 'Ozali na Compte?',
+    agencyName: 'Nkombo ya Agence',
+    licenseNumber: 'Numéro ya Licence',
+    agencyAddress: 'Adresse ya Agence',
+    agencyLogo: 'Logo ya Agence (URL)',
 
     // Dashboard
     profile: 'Profil',
