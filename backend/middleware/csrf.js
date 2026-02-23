@@ -41,8 +41,8 @@ const generateCsrfToken = (req, res, next) => {
         // Set the token in a cookie
         res.cookie(CSRF_COOKIE_NAME, token, {
             httpOnly: false, // Must be readable by client JavaScript
-            secure: process.env.NODE_ENV === 'production' ? true : false, // In production, must be true. In dev, can be false for HTTP.
-            sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'None', // Always 'None' for cross-site cookie in this context
+            secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+            sameSite: 'Lax', // 'Lax' is correct for same-origin unified deployment
             maxAge: COOKIE_MAX_AGE,
             path: '/'
         });

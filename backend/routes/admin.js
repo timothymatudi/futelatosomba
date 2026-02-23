@@ -18,8 +18,8 @@ router.use(adminAuth);
 router.get('/stats', async (req, res) => {
   try {
     const now = new Date();
-    const thirtyDaysAgo = new Date(now.setDate(now.getDate() - 30));
-    const sevenDaysAgo = new Date(now.setDate(now.getDate() - 7));
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
     // Get total counts
     const [

@@ -229,7 +229,7 @@ export const PropertyProvider = ({ children }) => {
     try {
       setLoading(true);
 
-      const response = await api.get('/properties/favorites');
+      const response = await api.get('/users/favorites');
 
       const fetchedProperties = response.data.properties || response.data.data || [];
       setProperties(fetchedProperties); // Update context state
