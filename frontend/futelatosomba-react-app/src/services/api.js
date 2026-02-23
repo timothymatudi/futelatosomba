@@ -1,6 +1,7 @@
 // API configuration and axios instance
 import axios from 'axios';
 import { getCsrfToken, CSRF_HEADER_NAME } from '../utils/csrf';
+import { LOCAL_STORAGE_KEYS } from '../utils/constants';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://futelatosomba-ldho.onrender.com/api';
 
@@ -15,8 +16,8 @@ const api = axios.create({
 
 // Request interceptor to add auth token and CSRF token
 api.interceptors.request.use(
-  async (config) => { // Made the interceptor function async
-    const token = localStorage.getItem('authToken');
+  async (config) => {
+    const token = localStorage.getItem(LOCAL_STORAGE_KEYS.TOKEN);
     if (token) {
       config.headers['x-auth-token'] = token;
     }
@@ -41,8 +42,8 @@ api.interceptors.response.use(
     if (error.response) {
       // Handle 401 Unauthorized
       if (error.response.status === 401) {
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('user');
+        localStorage.removeItem(LOCAL_STORAGE_KEYS.TOKEN);
+        localStorage.removeItem(LOCAL_STORAGE_KEYS.USER);
         window.location.href = '/login';
       }
 

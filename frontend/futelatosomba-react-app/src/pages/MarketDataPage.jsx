@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
-import { CITIES } from '../utils/constants'; // Assuming CITIES is defined here
+import api from '../services/api';
+import { CITIES } from '../utils/constants';
 import Button from '../components/common/Button';
 import Loading from '../components/common/Loading';
 import './MarketDataPage.css';
@@ -20,36 +21,28 @@ const MarketDataPage = () => {
     setError(null);
     try {
       // Fetch overview stats
-      const overviewResponse = await fetch('/api/properties/stats/overview');
-      const overviewData = await overviewResponse.json();
-      if (!overviewResponse.ok) {
-        throw new Error(overviewData.error || 'Failed to fetch overview stats');
-      }
-      setOverviewStats(overviewData);
+      const overviewResponse = await api.get('/properties/stats/overview');
+      setOverviewStats(overviewResponse.data);
 
       if (city) {
         // Fetch average price by type
-        const typeResponse = await fetch(`/api/properties/stats/average-price-by-type?city=${city}`);
-        const typeData = await typeResponse.json();
-        if (!typeResponse.ok) {
-          throw new Error(typeData.error || 'Failed to fetch average price by type');
-        }
-        setAvgPriceByType(typeData);
+        const typeResponse = await api.get('/properties/stats/average-price-by-type', {
+          params: { city }
+        });
+        setAvgPriceByType(typeResponse.data);
 
         // Fetch average price by bedrooms
-        const bedroomsResponse = await fetch(`/api/properties/stats/average-price-by-bedrooms?city=${city}`);
-        const bedroomsData = await bedroomsResponse.json();
-        if (!bedroomsResponse.ok) {
-          throw new Error(bedroomsData.error || 'Failed to fetch average price by bedrooms');
-        }
-        setAvgPriceByBedrooms(bedroomsData);
+        const bedroomsResponse = await api.get('/properties/stats/average-price-by-bedrooms', {
+          params: { city }
+        });
+        setAvgPriceByBedrooms(bedroomsResponse.data);
       } else {
         setAvgPriceByType(null);
         setAvgPriceByBedrooms(null);
       }
 
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Failed to fetch market data');
     } finally {
       setLoading(false);
     }

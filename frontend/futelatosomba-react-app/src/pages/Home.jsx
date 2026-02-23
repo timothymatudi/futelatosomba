@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react'; // Added useState
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProperty } from '../context/PropertyContext';
 import { useLanguage } from '../context/LanguageContext';
+import api from '../services/api';
 import PropertyList from '../components/property/PropertyList';
 import PropertyFilters from '../components/property/PropertyFilters';
 import Button from '../components/common/Button';
@@ -16,11 +17,8 @@ const Home = () => {
 
   const fetchOverviewStats = async () => {
     try {
-      const response = await fetch('/api/properties/stats/overview');
-      const data = await response.json();
-      if (response.ok) {
-        setOverviewStats(data);
-      }
+      const response = await api.get('/properties/stats/overview');
+      setOverviewStats(response.data);
     } catch (err) {
       console.error('Error fetching overview stats:', err);
     }
@@ -72,7 +70,7 @@ const Home = () => {
               onChange={(e) => {
                 updateFilters({ search: e.target.value });
               }}
-              onKeyPress={(e) => {
+              onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   fetchProperties();
                 }

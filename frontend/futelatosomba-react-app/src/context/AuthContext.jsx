@@ -36,9 +36,6 @@ export const AuthProvider = ({ children }) => {
           setToken(storedToken);
           setUser(parsedUser);
           setIsAuthenticated(true);
-
-          // Set api default header
-          api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
@@ -58,7 +55,6 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(false);
     localStorage.removeItem(LOCAL_STORAGE_KEYS.TOKEN);
     localStorage.removeItem(LOCAL_STORAGE_KEYS.USER);
-    delete api.defaults.headers.common['Authorization'];
   };
 
   // Login function
@@ -81,9 +77,6 @@ export const AuthProvider = ({ children }) => {
       // Save to localStorage
       localStorage.setItem(LOCAL_STORAGE_KEYS.TOKEN, newToken);
       localStorage.setItem(LOCAL_STORAGE_KEYS.USER, JSON.stringify(userData));
-
-      // Set api default header
-      api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
 
       toast.success('Login successful!');
       return { success: true, user: userData };
@@ -113,9 +106,6 @@ export const AuthProvider = ({ children }) => {
       // Save to localStorage
       localStorage.setItem(LOCAL_STORAGE_KEYS.TOKEN, newToken);
       localStorage.setItem(LOCAL_STORAGE_KEYS.USER, JSON.stringify(newUser));
-
-      // Set api default header
-      api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
 
       toast.success('Registration successful!');
       return { success: true, user: newUser };
