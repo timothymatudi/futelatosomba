@@ -2,7 +2,7 @@
 // The backend sets a 'csrf-token' cookie and the frontend must echo it back
 // via the 'x-csrf-token' header on state-changing requests.
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://futelatosomba-ldho.onrender.com/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
 const CSRF_TOKEN_URL = `${API_BASE_URL}/csrf-token`;
 const CSRF_COOKIE_NAME = 'csrf-token';
 export const CSRF_HEADER_NAME = 'x-csrf-token';
