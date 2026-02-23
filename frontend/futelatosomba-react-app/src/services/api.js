@@ -38,7 +38,7 @@ api.interceptors.request.use(
 // Response interceptor for error handling
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     if (error.response) {
       // Handle 401 Unauthorized
       if (error.response.status === 401) {
