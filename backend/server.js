@@ -1,5 +1,6 @@
 // Backend server for futelatosomba with Stripe integration
 require('dotenv').config();
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -204,7 +205,6 @@ app.use(sanitizeQueryParams);
 app.use(sanitizeMongoQuery);
 
 // Serve static files from frontend production build (local dev only; Vercel handles this via vercel.json)
-const path = require('path');
 app.use(express.static(path.join(__dirname, '..', 'frontend', 'futelatosomba-react-app', 'build')));
 
 // Serve uploaded files
