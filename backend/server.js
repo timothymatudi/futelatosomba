@@ -42,7 +42,7 @@ const {
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Trust proxy for Render deployment (fixes rate limiting warnings)
+// Trust proxy for Vercel/cloud deployment (fixes rate limiting behind reverse proxies)
 app.set('trust proxy', 1);
 
 // Connect to MongoDB
@@ -204,11 +204,11 @@ app.use(sanitizeQueryParams);
 // 6. NoSQL injection protection
 app.use(sanitizeMongoQuery);
 
-// Serve static files from frontend production build (local dev only; Vercel handles this via vercel.json)
-app.use(express.static(path.join(__dirname, '..', 'frontend', 'futelatosomba-react-app', 'build')));
-
-// Serve uploaded files
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Serve static files (local dev only; Vercel handles frontend via vercel.json and images via Blob)
+if (process.env.VERCEL !== '1') {
+    app.use(express.static(path.join(__dirname, '..', 'frontend', 'futelatosomba-react-app', 'build')));
+    app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+}
 
 // CSRF token generation middleware applied globally (sets cookie on every request)
 app.use(generateCsrfToken);
