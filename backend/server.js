@@ -19,7 +19,11 @@ const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 
 // Import security middleware
-const csurf = require('csurf');
+const {
+    generateCsrfToken,
+    validateCsrfToken,
+    getCsrfToken: csrfTokenHandler
+} = require('./middleware/csrf');
 const {
     apiLimiter,
     authLimiter,
@@ -33,8 +37,6 @@ const {
     sanitizeMongoQuery,
     validatePaymentAmount
 } = require('./middleware/validation');
-
-const csrfProtection = csurf({ cookie: true });
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -207,9 +209,11 @@ app.use(express.static('../frontend/futelatosomba-react-app/build'));
 // Serve uploaded files
 app.use('/uploads', express.static('uploads'));
 
-app.get('/api/csrf-token', csrfProtection, (req, res) => {
-  res.json({ csrfToken: req.csrfToken() });
-});
+// CSRF token generation middleware applied globally (sets cookie on every request)
+app.use(generateCsrfToken);
+
+// CSRF token endpoint - returns the token for the frontend to use in headers
+app.get('/api/csrf-token', csrfTokenHandler);
 
 // API Routes with rate limiting
 
@@ -222,14 +226,14 @@ app.get('/api/health', (req, res) => {
     });
 });
 
-// Authentication routes
-app.use('/api/auth', authRoutes);
+// Authentication routes - CSRF validation on state-changing requests
+app.use('/api/auth', validateCsrfToken, authRoutes);
 
 // Property routes - general API rate limiting
 app.use('/api/properties', apiLimiter, propertyRoutes);
 
-// User routes - general API rate limiting
-app.use('/api/users', apiLimiter, csrfProtection, userRoutes);
+// User routes - general API rate limiting + CSRF validation on state-changing requests
+app.use('/api/users', apiLimiter, validateCsrfToken, userRoutes);
 
 // Admin routes - general API rate limiting
 app.use('/api/admin', apiLimiter, adminRoutes);

@@ -208,9 +208,10 @@ router.post('/forgot-password', async (req, res) => {
 
     // Send password reset email
     try {
+      const fullName = (user.firstName + (user.lastName ? ' ' + user.lastName : '')).trim();
       await emailService.sendPasswordResetEmail(
         user.email,
-        user.fullName || user.username,
+        fullName || user.username,
         resetToken
       );
     } catch (emailError) {

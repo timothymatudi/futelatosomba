@@ -1,15 +1,27 @@
-// futelatosomba/frontend/futelatosomba-react-app/src/utils/csrf.js
+// CSRF utility for double-submit cookie pattern
+// The backend sets a 'csrf-token' cookie and the frontend must echo it back
+// via the 'x-csrf-token' header on state-changing requests.
 
-// Get API base URL from environment or use default
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://futelatosomba-ldho.onrender.com/api';
 const CSRF_TOKEN_URL = `${API_BASE_URL}/csrf-token`;
+const CSRF_COOKIE_NAME = 'csrf-token';
 export const CSRF_HEADER_NAME = 'x-csrf-token';
 
 let cachedCsrfToken = null;
 
-// Function to fetch the CSRF token from the backend
+// Read the CSRF token from the cookie (set by the backend middleware)
+const getTokenFromCookie = () => {
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie.match(new RegExp(`(?:^|;\\s*)${CSRF_COOKIE_NAME}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : null;
+};
+
+// Fetch the CSRF token from the backend endpoint (also sets the cookie)
 export const fetchCsrfToken = async () => {
-  if (cachedCsrfToken) {
+  // First try reading from cookie (avoids network request)
+  const cookieToken = getTokenFromCookie();
+  if (cookieToken) {
+    cachedCsrfToken = cookieToken;
     return cachedCsrfToken;
   }
 
@@ -19,7 +31,7 @@ export const fetchCsrfToken = async () => {
       headers: {
         'Content-Type': 'application/json',
       },
-      credentials: 'include', // Important: Include cookies in the request
+      credentials: 'include',
     });
 
     if (!response.ok) {
@@ -29,25 +41,33 @@ export const fetchCsrfToken = async () => {
 
     const data = await response.json();
     cachedCsrfToken = data.csrfToken;
-    console.log('CSRF token fetched successfully');
     return cachedCsrfToken;
   } catch (error) {
     console.error('Error fetching CSRF token:', error.message);
-    // Don't throw error, just return null to allow app to continue
-    // The interceptor will try to get the token again when needed
     return null;
   }
 };
 
-// Function to get the current CSRF token (either cached or fetched)
+// Get the current CSRF token (cookie -> cache -> fetch)
 export const getCsrfToken = async () => {
+  // Prefer the cookie value (always up to date with what the server set)
+  const cookieToken = getTokenFromCookie();
+  if (cookieToken) {
+    cachedCsrfToken = cookieToken;
+    return cachedCsrfToken;
+  }
   if (cachedCsrfToken) {
     return cachedCsrfToken;
   }
   return await fetchCsrfToken();
 };
 
-// Function to get the CSRF header object for Axios/Fetch
+// Invalidate cached token (call on 403 CSRF errors to force re-fetch)
+export const invalidateCsrfToken = () => {
+  cachedCsrfToken = null;
+};
+
+// Get the CSRF header object for Axios/Fetch
 export const getCsrfHeader = async () => {
   const token = await getCsrfToken();
   if (token) {

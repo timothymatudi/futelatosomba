@@ -1,6 +1,6 @@
 // API configuration and axios instance
 import axios from 'axios';
-import { getCsrfToken, CSRF_HEADER_NAME } from '../utils/csrf';
+import { getCsrfToken, invalidateCsrfToken, CSRF_HEADER_NAME } from '../utils/csrf';
 import { LOCAL_STORAGE_KEYS } from '../utils/constants';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://futelatosomba-ldho.onrender.com/api';
@@ -47,11 +47,20 @@ api.interceptors.response.use(
         window.location.href = '/login';
       }
 
-      // Handle 403 CSRF errors specifically
+      // Handle 403 CSRF errors - invalidate cache and retry once
       if (error.response.status === 403 &&
           (error.response.data?.error === 'CSRF token missing' ||
            error.response.data?.error === 'Invalid CSRF token')) {
-        console.error('CSRF token error:', error.response.data);
+        // Only retry once to avoid infinite loops
+        if (!error.config._csrfRetry) {
+          error.config._csrfRetry = true;
+          invalidateCsrfToken();
+          const newToken = await getCsrfToken();
+          if (newToken) {
+            error.config.headers[CSRF_HEADER_NAME] = newToken;
+            return api(error.config);
+          }
+        }
         return Promise.reject(new Error('Security token error. Please refresh the page and try again.'));
       }
 

@@ -531,7 +531,7 @@ const sendContactAgentEmail = async (agent, property, inquiry) => {
           <h1>📬 Nouvelle demande de contact</h1>
         </div>
         <div class="content">
-          <p>Bonjour ${agent.fullName || agent.username},</p>
+          <p>Bonjour ${((agent.firstName || '') + (agent.lastName ? ' ' + agent.lastName : '')).trim() || agent.username},</p>
 
           <p>Vous avez reçu une nouvelle demande de contact concernant votre propriété:</p>
 
@@ -568,7 +568,7 @@ const sendContactAgentEmail = async (agent, property, inquiry) => {
       </html>
     `,
     text: `
-Bonjour ${agent.fullName || agent.username},
+Bonjour ${((agent.firstName || '') + (agent.lastName ? ' ' + agent.lastName : '')).trim() || agent.username},
 
 Vous avez reçu une nouvelle demande de contact pour:
 ${property.title}
