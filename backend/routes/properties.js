@@ -6,8 +6,7 @@ const auth = require('../middleware/auth');
 const agentAuth = require('../middleware/agentAuth');
 const Property = require('../models/Property');
 const User = require('../models/User');
-const fs = require('fs');
-const { upload, uploadPropertyImages } = require('../middleware/upload');
+const { upload, uploadPropertyImages, deleteImage } = require('../middleware/upload');
 const emailService = require('../services/emailService');
 
 
@@ -777,13 +776,12 @@ router.post('/', agentAuth,
             // Validate input
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                // If validation fails, and images were processed, clean them up
+                // If validation fails, and images were uploaded to Blob, clean them up
                 if (req.processedImages && req.processedImages.length > 0) {
-                    req.processedImages.forEach(img => {
-                        fs.unlink(img.path, (err) => {
-                            if (err) console.error('Error deleting uploaded image:', err);
-                        });
-                    });
+                    for (const img of req.processedImages) {
+                        await deleteImage(img.image);
+                        await deleteImage(img.thumbnail);
+                    }
                 }
                 return res.status(400).json({ errors: errors.array() });
             }
@@ -876,13 +874,12 @@ router.put('/:id', agentAuth,
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                 // If validation fails, and new images were processed, clean them up
+                 // If validation fails, and new images were uploaded to Blob, clean them up
                  if (req.processedImages && req.processedImages.length > 0) {
-                    req.processedImages.forEach(img => {
-                        fs.unlink(img.path, (err) => {
-                            if (err) console.error('Error deleting temporary uploaded image:', err);
-                        });
-                    });
+                    for (const img of req.processedImages) {
+                        await deleteImage(img.image);
+                        await deleteImage(img.thumbnail);
+                    }
                 }
                 return res.status(400).json({ errors: errors.array() });
             }

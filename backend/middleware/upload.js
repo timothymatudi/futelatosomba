@@ -1,9 +1,9 @@
-// Image upload middleware using Multer and Sharp for processing
+// Image upload middleware using Multer (memory) + Vercel Blob for storage
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
+const { put, del } = require('@vercel/blob');
 
-// Try to load Sharp, but make it optional for Android/Termux environments
+// Try to load Sharp, but make it optional for environments where it's unavailable
 let sharp = null;
 try {
     sharp = require('sharp');
@@ -12,18 +12,7 @@ try {
     console.warn('Images will be stored as-is without resizing.');
 }
 
-// Ensure uploads directory exists
-const uploadsDir = path.join(__dirname, '../uploads');
-const propertyImagesDir = path.join(uploadsDir, 'properties');
-const userAvatarsDir = path.join(uploadsDir, 'avatars');
-
-[uploadsDir, propertyImagesDir, userAvatarsDir].forEach(dir => {
-    if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-    }
-});
-
-// Configure storage for memory storage (we'll process with sharp)
+// Configure storage for memory storage (we'll process with sharp then upload to Blob)
 const storage = multer.memoryStorage();
 
 // File filter for images only
@@ -49,69 +38,73 @@ const upload = multer({
     fileFilter: imageFilter
 });
 
-// Process and save image with Sharp (or just save if Sharp unavailable)
+// Process image buffer with Sharp (or return as-is)
+const processBuffer = async (buffer, type = 'property') => {
+    if (!sharp) return buffer;
+
+    try {
+        if (type === 'avatar') {
+            return await sharp(buffer)
+                .resize(300, 300, { fit: 'cover', position: 'center' })
+                .jpeg({ quality: 90 })
+                .toBuffer();
+        } else {
+            return await sharp(buffer)
+                .resize(1200, null, { fit: 'inside', withoutEnlargement: true })
+                .jpeg({ quality: 85 })
+                .toBuffer();
+        }
+    } catch (error) {
+        console.error('Sharp processing failed, using original buffer:', error.message);
+        return buffer;
+    }
+};
+
+// Generate thumbnail buffer with Sharp (or return null)
+const generateThumbnailBuffer = async (buffer) => {
+    if (!sharp) return null;
+
+    try {
+        return await sharp(buffer)
+            .resize(400, 300, { fit: 'cover', position: 'center' })
+            .jpeg({ quality: 80 })
+            .toBuffer();
+    } catch (error) {
+        console.error('Thumbnail generation failed:', error.message);
+        return null;
+    }
+};
+
+// Upload a buffer to Vercel Blob and return the public URL
+const uploadToBlob = async (buffer, filename) => {
+    const blob = await put(filename, buffer, { access: 'public' });
+    return blob.url;
+};
+
+// Process and upload image to Vercel Blob
 const processImage = async (buffer, filename, type = 'property') => {
     try {
-        const outputDir = type === 'avatar' ? userAvatarsDir : propertyImagesDir;
-        const outputPath = path.join(outputDir, filename);
-
-        if (sharp) {
-            // Different processing based on type
-            if (type === 'avatar') {
-                // Avatar: resize to square, 300x300
-                await sharp(buffer)
-                    .resize(300, 300, {
-                        fit: 'cover',
-                        position: 'center'
-                    })
-                    .jpeg({ quality: 90 })
-                    .toFile(outputPath);
-            } else {
-                // Property image: resize to max 1200px width, maintain aspect ratio
-                await sharp(buffer)
-                    .resize(1200, null, {
-                        fit: 'inside',
-                        withoutEnlargement: true
-                    })
-                    .jpeg({ quality: 85 })
-                    .toFile(outputPath);
-            }
-        } else {
-            // Sharp not available, just save the file as-is
-            fs.writeFileSync(outputPath, buffer);
-        }
-
-        // Return relative path for storage in database
-        return `/uploads/${type === 'avatar' ? 'avatars' : 'properties'}/${filename}`;
+        const processedBuffer = await processBuffer(buffer, type);
+        const blobUrl = await uploadToBlob(processedBuffer, `${type === 'avatar' ? 'avatars' : 'properties'}/${filename}`);
+        return blobUrl;
     } catch (error) {
-        console.error('Error processing image:', error);
+        console.error('Error processing/uploading image:', error);
         throw new Error('Failed to process image');
     }
 };
 
-// Generate thumbnail (or return original if Sharp unavailable)
+// Generate and upload thumbnail to Vercel Blob
 const generateThumbnail = async (buffer, filename) => {
     try {
-        if (sharp) {
-            const thumbnailPath = path.join(propertyImagesDir, `thumb_${filename}`);
-
-            await sharp(buffer)
-                .resize(400, 300, {
-                    fit: 'cover',
-                    position: 'center'
-                })
-                .jpeg({ quality: 80 })
-                .toFile(thumbnailPath);
-
-            return `/uploads/properties/thumb_${filename}`;
-        } else {
-            // No Sharp, return original image path
-            return `/uploads/properties/${filename}`;
+        const thumbBuffer = await generateThumbnailBuffer(buffer);
+        if (thumbBuffer) {
+            return await uploadToBlob(thumbBuffer, `properties/thumb_${filename}`);
         }
+        // If no thumbnail could be generated, upload the original as thumbnail
+        return await uploadToBlob(buffer, `properties/thumb_${filename}`);
     } catch (error) {
         console.error('Error generating thumbnail:', error);
-        // If thumbnail generation fails, return original
-        return `/uploads/properties/${filename}`;
+        return null;
     }
 };
 
@@ -124,14 +117,12 @@ const uploadPropertyImage = async (req, res, next) => {
 
         const filename = `property_${Date.now()}_${Math.random().toString(36).substring(7)}.jpg`;
 
-        // Process image
-        const imagePath = await processImage(req.file.buffer, filename, 'property');
-        const thumbnailPath = await generateThumbnail(req.file.buffer, filename);
+        const imageUrl = await processImage(req.file.buffer, filename, 'property');
+        const thumbnailUrl = await generateThumbnail(req.file.buffer, filename);
 
-        // Add paths to request
         req.processedImage = {
-            image: imagePath,
-            thumbnail: thumbnailPath
+            image: imageUrl,
+            thumbnail: thumbnailUrl
         };
 
         next();
@@ -143,7 +134,6 @@ const uploadPropertyImage = async (req, res, next) => {
 // Middleware to handle multiple property images upload
 const uploadPropertyImages = async (req, res, next) => {
     try {
-        // If no files uploaded, skip processing (images are optional in some cases)
         if (!req.files || req.files.length === 0) {
             req.processedImages = [];
             return next();
@@ -151,22 +141,19 @@ const uploadPropertyImages = async (req, res, next) => {
 
         const processedImages = [];
 
-        // Process each image
         for (const file of req.files) {
             const filename = `property_${Date.now()}_${Math.random().toString(36).substring(7)}.jpg`;
 
-            const imagePath = await processImage(file.buffer, filename, 'property');
-            const thumbnailPath = await generateThumbnail(file.buffer, filename);
+            const imageUrl = await processImage(file.buffer, filename, 'property');
+            const thumbnailUrl = await generateThumbnail(file.buffer, filename);
 
             processedImages.push({
-                image: imagePath,
-                thumbnail: thumbnailPath
+                image: imageUrl,
+                thumbnail: thumbnailUrl
             });
         }
 
-        // Add processed images to request
         req.processedImages = processedImages;
-
         next();
     } catch (error) {
         console.error('Error in uploadPropertyImages:', error);
@@ -182,28 +169,24 @@ const uploadAvatar = async (req, res, next) => {
         }
 
         const filename = `avatar_${Date.now()}_${Math.random().toString(36).substring(7)}.jpg`;
+        const avatarUrl = await processImage(req.file.buffer, filename, 'avatar');
 
-        // Process avatar
-        const avatarPath = await processImage(req.file.buffer, filename, 'avatar');
-
-        // Add path to request
-        req.processedAvatar = avatarPath;
-
+        req.processedAvatar = avatarUrl;
         next();
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
 
-// Delete image file
-const deleteImage = (imagePath) => {
+// Delete image from Vercel Blob by its URL
+const deleteImage = async (imageUrl) => {
     try {
-        const fullPath = path.join(__dirname, '..', imagePath);
-        if (fs.existsSync(fullPath)) {
-            fs.unlinkSync(fullPath);
+        // Only delete Blob URLs (they contain vercel-storage.com or blob.vercel-storage.com)
+        if (imageUrl && (imageUrl.includes('vercel-storage.com') || imageUrl.includes('blob.vercel'))) {
+            await del(imageUrl);
         }
     } catch (error) {
-        console.error('Error deleting image:', error);
+        console.error('Error deleting image from Blob:', error);
     }
 };
 
