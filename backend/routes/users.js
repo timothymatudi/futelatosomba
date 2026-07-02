@@ -276,8 +276,8 @@ router.delete('/alerts/:id', auth, async (req, res) => {
     }
 });
 
-// Get user's properties
-router.get('/:id/properties', async (req, res) => {
+// Get user's properties (authenticated — consistent with the other /:id routes)
+router.get('/:id/properties', auth, async (req, res) => {
     try {
         const properties = await Property.find({ owner: req.params.id })
             .sort({ createdAt: -1 });
@@ -312,11 +312,14 @@ router.get('/:id', auth, async (req, res) => {
 // privilege fields are stripped so a self-update can't escalate to agent/admin.
 router.put('/:id', auth, async (req, res) => {
     try {
-        if (req.user.id !== req.params.id) {
+        // Owner can edit their own profile; an admin can edit anyone's.
+        const requester = await User.findById(req.user.id).select('role');
+        const isAdmin = requester?.role === 'admin';
+        if (req.user.id !== req.params.id && !isAdmin) {
             return res.status(403).json({ error: 'You can only update your own profile' });
         }
 
-        // Never allow these to be set via a profile update.
+        // Never allow these to be set via a profile update (applies to admins too).
         const { password, role, isPremium, isVerified, _id, ...updateData } = req.body;
 
         const user = await User.findByIdAndUpdate(
