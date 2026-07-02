@@ -129,10 +129,12 @@ function UserProfilePage() {
     if (window.confirm('Are you sure you want to unfavorite this property?')) {
       try {
         const token = localStorage.getItem('authToken');
+        const csrfHeader = await getCsrfHeader();
         const response = await fetch(`/api/properties/${propertyId}/favorite`, {
           method: 'DELETE',
           headers: {
-            'x-auth-token': token
+            'x-auth-token': token,
+            ...csrfHeader
           }
         });
         if (!response.ok) {
