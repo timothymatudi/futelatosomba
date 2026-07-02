@@ -30,7 +30,8 @@ const PropertyDetails = () => {
       setProperty(data.data);
 
       // Check if property is in user's favorites
-      if (user && data.data.favorites && data.data.favorites.includes(user._id)) {
+      const userId = user?._id || user?.id;
+      if (userId && data.data.favorites && data.data.favorites.includes(userId)) {
         setIsFavorited(true);
       }
     } catch (error) {

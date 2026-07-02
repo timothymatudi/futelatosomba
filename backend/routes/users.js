@@ -4,6 +4,7 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const auth = require('../middleware/auth');
 const User = require('../models/User');
+const Property = require('../models/Property');
 
 // Generate JWT token
 const generateToken = (userId) => {
@@ -152,61 +153,6 @@ router.get('/me', auth, async (req, res) => {
     }
 });
 
-// Get user profile
-router.get('/:id', async (req, res) => {
-    try {
-        const user = await User.findById(req.params.id)
-            .populate('properties');
-
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
-        }
-
-        res.json(user);
-    } catch (error) {
-        console.error('Error fetching user:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Update user profile
-router.put('/:id', async (req, res) => {
-    try {
-        const { password, ...updateData } = req.body;
-
-        const user = await User.findByIdAndUpdate(
-            req.params.id,
-            updateData,
-            { new: true, runValidators: true }
-        );
-
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
-        }
-
-        res.json({
-            message: 'Profile updated successfully',
-            user
-        });
-    } catch (error) {
-        console.error('Error updating user:', error);
-        res.status(400).json({ error: error.message });
-    }
-});
-
-// Get user's properties
-router.get('/:id/properties', async (req, res) => {
-    try {
-        const properties = await Property.find({ owner: req.params.id })
-            .sort({ createdAt: -1 });
-
-        res.json(properties);
-    } catch (error) {
-        console.error('Error fetching user properties:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
 // Save a search
 router.post('/searches', auth, async (req, res) => {
     try {
@@ -327,6 +273,61 @@ router.delete('/alerts/:id', auth, async (req, res) => {
     } catch (error) {
         console.error('Error deleting property alert:', error);
         res.status(500).json({ error: error.message });
+    }
+});
+
+// Get user's properties
+router.get('/:id/properties', async (req, res) => {
+    try {
+        const properties = await Property.find({ owner: req.params.id })
+            .sort({ createdAt: -1 });
+
+        res.json(properties);
+    } catch (error) {
+        console.error('Error fetching user properties:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get user profile
+router.get('/:id', async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id)
+            .populate('properties');
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.json(user);
+    } catch (error) {
+        console.error('Error fetching user:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Update user profile
+router.put('/:id', async (req, res) => {
+    try {
+        const { password, ...updateData } = req.body;
+
+        const user = await User.findByIdAndUpdate(
+            req.params.id,
+            updateData,
+            { new: true, runValidators: true }
+        );
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.json({
+            message: 'Profile updated successfully',
+            user
+        });
+    } catch (error) {
+        console.error('Error updating user:', error);
+        res.status(400).json({ error: error.message });
     }
 });
 

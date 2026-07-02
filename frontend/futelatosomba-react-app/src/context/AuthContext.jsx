@@ -211,6 +211,64 @@ export const AuthProvider = ({ children }) => {
     return user?.role === 'admin';
   };
 
+  const fetchUserSavedSearches = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/users/searches');
+      return { success: true, searches: response.data };
+    } catch (error) {
+      const message = extractErrorMessage(error);
+      toast.error(message);
+      return { success: false, error: message };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteUserSavedSearch = async (searchId) => {
+    try {
+      setLoading(true);
+      await api.delete(`/users/searches/${searchId}`);
+      toast.success('Saved search deleted!');
+      return { success: true };
+    } catch (error) {
+      const message = extractErrorMessage(error);
+      toast.error(message);
+      return { success: false, error: message };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchUserPropertyAlerts = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/users/alerts');
+      return { success: true, alerts: response.data };
+    } catch (error) {
+      const message = extractErrorMessage(error);
+      toast.error(message);
+      return { success: false, error: message };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteUserPropertyAlert = async (alertId) => {
+    try {
+      setLoading(true);
+      await api.delete(`/users/alerts/${alertId}`);
+      toast.success('Property alert deleted!');
+      return { success: true };
+    } catch (error) {
+      const message = extractErrorMessage(error);
+      toast.error(message);
+      return { success: false, error: message };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const value = {
     user,
     token,
@@ -224,7 +282,11 @@ export const AuthProvider = ({ children }) => {
     requestPasswordReset,
     hasRole,
     isAgent,
-    isAdmin
+    isAdmin,
+    fetchUserSavedSearches,
+    deleteUserSavedSearch,
+    fetchUserPropertyAlerts,
+    deleteUserPropertyAlert
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import PropertyCard from '../components/PropertyCard'; // Reusing PropertyCard for display
 import AgentPropertyForm from '../components/AgentPropertyForm'; // Import AgentPropertyForm
 
 function AgentDashboardPage() {
@@ -11,11 +10,11 @@ function AgentDashboardPage() {
   const [showAddForm, setShowAddForm] = useState(false); // State to toggle add form
   const navigate = useNavigate();
 
-  const fetchAgentData = async () => {
+  const fetchAgentData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('authToken');
       if (!token) {
         navigate('/login');
         return;
@@ -52,16 +51,16 @@ function AgentDashboardPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [navigate]);
 
   useEffect(() => {
     fetchAgentData();
-  }, [navigate]);
+  }, [fetchAgentData]);
 
   const handleDeleteProperty = async (propertyId) => {
     if (window.confirm('Are you sure you want to delete this property?')) {
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('authToken');
         const response = await fetch(`/api/properties/${propertyId}`, {
           method: 'DELETE',
           headers: {

@@ -19,7 +19,10 @@ const propertyService = {
   // Get single property by ID
   getPropertyById: async (id) => {
     const response = await api.get(`/properties/${id}`);
-    return response.data;
+    return {
+      ...response.data,
+      data: response.data.property || response.data.data || response.data,
+    };
   },
 
   // Create new property

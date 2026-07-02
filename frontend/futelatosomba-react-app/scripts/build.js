@@ -1,5 +1,24 @@
 'use strict';
 
+// workbox-build can pull in whatwg-url/tr46 versions that still load Node's
+// deprecated core `punycode` module. The warning is harmless on Node 22, but it
+// makes build output noisy. Suppress only DEP0040 here rather than hiding all
+// warnings.
+const originalEmitWarning = process.emitWarning;
+process.emitWarning = function emitWarningWithoutDeprecatedCorePunycode(warning, ...args) {
+  const options = args[0];
+  const code =
+    (warning && typeof warning === 'object' && warning.code) ||
+    (options && typeof options === 'object' && options.code) ||
+    args[1];
+
+  if (code === 'DEP0040') {
+    return;
+  }
+
+  return originalEmitWarning.call(process, warning, ...args);
+};
+
 // Do this as the first thing so that any code reading it knows the right env.
 process.env.BABEL_ENV = 'production';
 process.env.NODE_ENV = 'production';

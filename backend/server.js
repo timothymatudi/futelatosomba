@@ -136,7 +136,14 @@ app.use(cors({
 app.use(cookieParser());
 
 // 4. Body parsing middleware
-app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.json({
+    limit: '10mb',
+    verify: (req, res, buf) => {
+        if (req.originalUrl === '/api/webhook') {
+            req.rawBody = buf;
+        }
+    }
+}));
 app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 
 // 5. Query parameter sanitization
@@ -277,7 +284,7 @@ app.post('/api/webhook', bodyParser.raw({ type: 'application/json' }), async (re
 
     try {
         event = stripe.webhooks.constructEvent(
-            req.body,
+            req.rawBody || req.body,
             sig,
             process.env.STRIPE_WEBHOOK_SECRET
         );

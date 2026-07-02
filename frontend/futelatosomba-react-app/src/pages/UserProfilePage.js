@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getCsrfHeader } from '../utils/csrf';
 // import './UserProfilePage.css'; // Will create this later
 
 function UserProfilePage() {
@@ -11,11 +12,11 @@ function UserProfilePage() {
   const [favoriteProperties, setFavoriteProperties] = useState([]);
   const navigate = useNavigate();
 
-  const fetchUserData = async () => {
+  const fetchUserData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('authToken');
       if (!token) {
         navigate('/login');
         return;
@@ -56,7 +57,7 @@ function UserProfilePage() {
       }
 
       // Fetch favorite properties
-      const favoritesResponse = await fetch('/api/properties/favorites', { // This endpoint does not exist yet
+      const favoritesResponse = await fetch('/api/users/favorites', { // This endpoint does not exist yet
         headers: {
           'x-auth-token': token
         }
@@ -69,25 +70,27 @@ function UserProfilePage() {
 
     } catch (err) {
       setError(err.message);
-      localStorage.removeItem('token'); // Clear token if fetching user data fails
+      localStorage.removeItem('authToken'); // Clear token if fetching user data fails
       navigate('/login'); // Redirect on error
     } finally {
       setLoading(false);
     }
-  };
+  }, [navigate]);
 
   useEffect(() => {
     fetchUserData();
-  }, [navigate]);
+  }, [fetchUserData]);
 
   const handleDeleteSavedSearch = async (searchId) => {
     if (window.confirm('Are you sure you want to delete this saved search?')) {
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('authToken');
+        const csrfHeader = await getCsrfHeader();
         const response = await fetch(`/api/users/searches/${searchId}`, {
           method: 'DELETE',
           headers: {
-            'x-auth-token': token
+            'x-auth-token': token,
+            ...csrfHeader
           }
         });
         if (!response.ok) {
@@ -103,11 +106,13 @@ function UserProfilePage() {
   const handleDeletePropertyAlert = async (alertId) => {
     if (window.confirm('Are you sure you want to delete this property alert?')) {
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('authToken');
+        const csrfHeader = await getCsrfHeader();
         const response = await fetch(`/api/users/alerts/${alertId}`, {
           method: 'DELETE',
           headers: {
-            'x-auth-token': token
+            'x-auth-token': token,
+            ...csrfHeader
           }
         });
         if (!response.ok) {
@@ -123,7 +128,7 @@ function UserProfilePage() {
   const handleUnfavoriteProperty = async (propertyId) => {
     if (window.confirm('Are you sure you want to unfavorite this property?')) {
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('authToken');
         const response = await fetch(`/api/properties/${propertyId}/favorite`, {
           method: 'DELETE',
           headers: {

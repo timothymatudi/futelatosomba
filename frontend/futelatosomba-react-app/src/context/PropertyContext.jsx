@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext, useCallback } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 import { toast } from 'react-toastify';
-import { API_BASE_URL, PAGINATION } from '../utils/constants';
+import { PAGINATION } from '../utils/constants';
 import { extractErrorMessage } from '../utils/formatters';
 
 const PropertyContext = createContext(null);
@@ -65,14 +65,18 @@ export const PropertyProvider = ({ children }) => {
         }
       });
 
-      const response = await axios.get(`${API_BASE_URL}/properties`, { params });
+      const response = await api.get('/properties', { params });
 
       setProperties(response.data.properties || response.data.data || []);
+      const paginationData = response.data.pagination || {};
       setPagination({
-        page: response.data.page || page,
-        limit: response.data.limit || pagination.limit,
-        total: response.data.total || 0,
-        pages: response.data.pages || Math.ceil((response.data.total || 0) / pagination.limit)
+        page: response.data.page || paginationData.currentPage || page,
+        limit: response.data.limit || paginationData.itemsPerPage || pagination.limit,
+        total: response.data.total || paginationData.totalItems || 0,
+        pages:
+          response.data.pages ||
+          paginationData.totalPages ||
+          Math.ceil((response.data.total || paginationData.totalItems || 0) / pagination.limit)
       });
 
       return { success: true };
@@ -90,10 +94,11 @@ export const PropertyProvider = ({ children }) => {
     try {
       setLoading(true);
 
-      const response = await axios.get(`${API_BASE_URL}/properties/${id}`);
+      const response = await api.get(`/properties/${id}`);
 
-      setCurrentProperty(response.data.property || response.data.data);
-      return { success: true, property: response.data.property || response.data.data };
+      const property = response.data.property || response.data.data || response.data;
+      setCurrentProperty(property);
+      return { success: true, property };
     } catch (error) {
       const message = extractErrorMessage(error);
       toast.error(message);
@@ -108,7 +113,7 @@ export const PropertyProvider = ({ children }) => {
     try {
       setLoading(true);
 
-      const response = await axios.post(`${API_BASE_URL}/properties`, propertyData, {
+      const response = await api.post('/properties', propertyData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -130,7 +135,7 @@ export const PropertyProvider = ({ children }) => {
     try {
       setLoading(true);
 
-      const response = await axios.put(`${API_BASE_URL}/properties/${id}`, propertyData, {
+      const response = await api.put(`/properties/${id}`, propertyData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -152,7 +157,7 @@ export const PropertyProvider = ({ children }) => {
     try {
       setLoading(true);
 
-      await axios.delete(`${API_BASE_URL}/properties/${id}`);
+      await api.delete(`/properties/${id}`);
 
       // Remove from local state
       setProperties(prev => prev.filter(p => p._id !== id));
@@ -173,10 +178,11 @@ export const PropertyProvider = ({ children }) => {
     try {
       setLoading(true);
 
-      const response = await axios.get(`${API_BASE_URL}/properties/user/my-properties`);
+      const response = await api.get('/properties/user/my-properties');
 
-      setProperties(response.data.properties || response.data.data || []);
-      return { success: true, properties: response.data.properties || response.data.data };
+      const fetchedProperties = response.data.properties || response.data.data || response.data || [];
+      setProperties(fetchedProperties);
+      return { success: true, properties: fetchedProperties };
     } catch (error) {
       const message = extractErrorMessage(error);
       toast.error(message);
@@ -191,7 +197,7 @@ export const PropertyProvider = ({ children }) => {
     try {
       setLoading(true);
 
-      const response = await axios.patch(`${API_BASE_URL}/properties/${id}/status`, { status });
+      const response = await api.patch(`/properties/${id}/status`, { status });
 
       // Update in local state
       setProperties(prev =>
@@ -212,7 +218,7 @@ export const PropertyProvider = ({ children }) => {
   // Toggle favorite
   const toggleFavorite = async (id) => {
     try {
-      const { data } = await axios.post(`${API_BASE_URL}/properties/${id}/favorite`);
+      const { data } = await api.post(`/properties/${id}/favorite`);
 
       toast.success(data.message || 'Favorite updated!');
       return { success: true };
@@ -228,9 +234,9 @@ export const PropertyProvider = ({ children }) => {
     try {
       setLoading(true);
 
-      const response = await axios.get(`${API_BASE_URL}/properties/favorites`);
+      const response = await api.get('/properties/favorites');
 
-      const fetchedProperties = response.data.properties || response.data.data || [];
+      const fetchedProperties = response.data.properties || response.data.data || response.data || [];
       setProperties(fetchedProperties); // Update context state
       return { success: true, properties: fetchedProperties }; // Return properties
     } catch (error) {
@@ -245,7 +251,7 @@ export const PropertyProvider = ({ children }) => {
   // Contact property owner
   const contactOwner = async (propertyId, name, email, phone, message) => { // Updated parameters
     try {
-      await axios.post(`${API_BASE_URL}/properties/${propertyId}/contact-agent`, { // Updated endpoint
+      await api.post(`/properties/${propertyId}/contact-agent`, { // Updated endpoint
         name,
         email,
         phone,

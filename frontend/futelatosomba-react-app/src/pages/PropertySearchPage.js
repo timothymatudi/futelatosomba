@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import PropertyCard from '../components/PropertyCard'; // Import PropertyCard
 
 function PropertySearchPage() {
@@ -25,7 +25,7 @@ function PropertySearchPage() {
   const [error, setError] = useState(null);
   const [pagination, setPagination] = useState({});
 
-  const fetchProperties = async (page = 1) => {
+  const fetchProperties = useCallback(async (page = 1) => {
     setLoading(true);
     setError(null);
     try {
@@ -42,11 +42,11 @@ function PropertySearchPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
 
   useEffect(() => {
     fetchProperties();
-  }, [filters]); // Refetch when filters change
+  }, [fetchProperties]); // Refetch when filters change
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;

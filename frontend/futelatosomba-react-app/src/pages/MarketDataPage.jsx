@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
-import { CITIES } from '../utils/constants'; // Assuming CITIES is defined here
 import Button from '../components/common/Button';
 import Loading from '../components/common/Loading';
 import './MarketDataPage.css';

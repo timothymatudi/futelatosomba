@@ -2,7 +2,7 @@
   "name": "futelatosomba-react-app",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://localhost:3001",
+  "proxy": "http://localhost:5000",
   "dependencies": {
     "@babel/core": "^7.16.0",
     "@babel/runtime": "^7.28.4",

@@ -617,6 +617,36 @@ router.get('/', async (req, res) => {
     }
 });
 
+// Get the authenticated user's favorite properties.
+// This must be registered before "/:id" so "favorites" is not treated as a property id.
+router.get('/favorites', auth, async (req, res) => {
+    try {
+        const properties = await Property.find({ favorites: req.user.id })
+            .sort({ createdAt: -1 })
+            .populate('owner', 'username email firstName lastName phone agencyName licenseNumber agencyAddress agencyLogo');
+
+        res.json(properties);
+    } catch (error) {
+        console.error('Error fetching favorite properties:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get properties owned by the authenticated agent/admin.
+// This must be registered before "/:id" so "user" is not treated as a property id.
+router.get('/user/my-properties', agentAuth, async (req, res) => {
+    try {
+        const properties = await Property.find({ owner: req.fullUser._id })
+            .sort({ createdAt: -1 })
+            .populate('owner', 'username email firstName lastName phone agencyName licenseNumber agencyAddress agencyLogo');
+
+        res.json({ properties });
+    } catch (error) {
+        console.error('Error fetching agent properties:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Get single property by ID
 router.get('/:id', async (req, res) => {
     try {
@@ -1008,7 +1038,10 @@ router.post('/:id/favorite', auth, async (req, res) => {
         }
 
         // Add user to favorites if not already there
-        if (!property.favorites.includes(req.user.id)) {
+        const alreadyFavorited = property.favorites.some(
+            (userId) => userId.toString() === req.user.id
+        );
+        if (!alreadyFavorited) {
             property.favorites.push(req.user.id);
             await property.save();
         }

@@ -29,10 +29,14 @@ export const fetchCsrfToken = async () => {
 
     const data = await response.json();
     cachedCsrfToken = data.csrfToken;
-    console.log('CSRF token fetched successfully');
+    if (process.env.NODE_ENV !== 'test') {
+      console.log('CSRF token fetched successfully');
+    }
     return cachedCsrfToken;
   } catch (error) {
-    console.error('Error fetching CSRF token:', error.message);
+    if (process.env.NODE_ENV !== 'test') {
+      console.error('Error fetching CSRF token:', error.message);
+    }
     // Don't throw error, just return null to allow app to continue
     // The interceptor will try to get the token again when needed
     return null;

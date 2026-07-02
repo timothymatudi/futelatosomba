@@ -35,7 +35,9 @@ const EditProperty = () => {
       const data = await propertyService.getPropertyById(id);
 
       // Check if user owns this property
-      if (data.data.owner._id !== user._id) {
+      const ownerId = data.data.owner?._id || data.data.owner;
+      const userId = user?._id || user?.id;
+      if (ownerId !== userId) {
         toast.error('You can only edit your own properties');
         navigate('/dashboard');
         return;

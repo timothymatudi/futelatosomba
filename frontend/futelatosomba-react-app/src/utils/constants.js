@@ -159,8 +159,8 @@ export const STRIPE_CONFIG = {
 };
 
 export const LOCAL_STORAGE_KEYS = {
-  TOKEN: 'futelatosomba_token',
-  USER: 'futelatosomba_user',
+  TOKEN: 'authToken',
+  USER: 'user',
   LANGUAGE: 'futelatosomba_language'
 };
 

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
 import ImageUploader from './ImageUploader';
 import { PROPERTY_TYPES, LISTING_TYPES, CITIES, KINSHASA_COMMUNES, AMENITIES } from '../../utils/constants';
 import { toast } from 'react-toastify';
@@ -9,7 +8,6 @@ import './PropertyForm.css';
 
 const PropertyForm = ({ initialData = null, isEdit = false }) => {
   const navigate = useNavigate();
-  const { } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
 
