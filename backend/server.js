@@ -176,8 +176,10 @@ app.get('/api/health', (req, res) => {
 // Authentication routes
 app.use('/api/auth', authRoutes);
 
-// Property routes - general API rate limiting
-app.use('/api/properties', apiLimiter, propertyRoutes);
+// Property routes - general API rate limiting + CSRF (csurf exempts GET/HEAD/
+// OPTIONS, so public browsing is unaffected; create/update/delete now require a
+// CSRF token, which the frontend api client attaches automatically).
+app.use('/api/properties', apiLimiter, csrfProtection, propertyRoutes);
 
 // User routes - general API rate limiting
 app.use('/api/users', apiLimiter, csrfProtection, userRoutes);

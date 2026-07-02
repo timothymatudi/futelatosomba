@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AgentPropertyForm from '../components/AgentPropertyForm'; // Import AgentPropertyForm
+import api from '../services/api'; // Shared client that attaches auth + CSRF headers
 
 function AgentDashboardPage() {
   const [user, setUser] = useState(null);
@@ -60,21 +61,13 @@ function AgentDashboardPage() {
   const handleDeleteProperty = async (propertyId) => {
     if (window.confirm('Are you sure you want to delete this property?')) {
       try {
-        const token = localStorage.getItem('authToken');
-        const response = await fetch(`/api/properties/${propertyId}`, {
-          method: 'DELETE',
-          headers: {
-            'x-auth-token': token
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error(`Failed to delete property`);
-        }
+        // Go through the shared api client so the CSRF token (now required on
+        // /api/properties) and auth header are attached automatically.
+        await api.delete(`/properties/${propertyId}`);
         // Refresh properties after deletion
         fetchAgentData();
       } catch (err) {
-        setError(err.message);
+        setError(err.response?.data?.error || err.message || 'Failed to delete property');
       }
     }
   };
