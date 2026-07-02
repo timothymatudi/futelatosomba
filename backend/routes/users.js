@@ -289,8 +289,9 @@ router.get('/:id/properties', async (req, res) => {
     }
 });
 
-// Get user profile
-router.get('/:id', async (req, res) => {
+// Get user profile (authenticated — this returns the full user record incl. email
+// and agent details, so it must not be readable without a valid token).
+router.get('/:id', auth, async (req, res) => {
     try {
         const user = await User.findById(req.params.id)
             .populate('properties');
@@ -306,10 +307,17 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// Update user profile
-router.put('/:id', async (req, res) => {
+// Update user profile (authenticated + owner-only). Without this a caller could
+// overwrite ANY user's profile by id. Users may only edit their own record, and
+// privilege fields are stripped so a self-update can't escalate to agent/admin.
+router.put('/:id', auth, async (req, res) => {
     try {
-        const { password, ...updateData } = req.body;
+        if (req.user.id !== req.params.id) {
+            return res.status(403).json({ error: 'You can only update your own profile' });
+        }
+
+        // Never allow these to be set via a profile update.
+        const { password, role, isPremium, isVerified, _id, ...updateData } = req.body;
 
         const user = await User.findByIdAndUpdate(
             req.params.id,
