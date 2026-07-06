@@ -320,7 +320,14 @@ router.put('/:id', auth, async (req, res) => {
         }
 
         // Never allow these to be set via a profile update (applies to admins too).
-        const { password, role, isPremium, isVerified, _id, ...updateData } = req.body;
+        // Note: the model's field is isEmailVerified (not isVerified); the token
+        // fields must also be stripped or a user could forge verification/reset state.
+        const {
+            password, role, isPremium, isVerified, isEmailVerified,
+            emailVerificationToken, emailVerificationExpires,
+            resetPasswordToken, resetPasswordExpires,
+            _id, ...updateData
+        } = req.body;
 
         const user = await User.findByIdAndUpdate(
             req.params.id,
