@@ -22,7 +22,7 @@ router.post('/register', async (req, res, next) => {
   } = req.body;
 
   // Basic validation for required fields
-  if (!email || !password || !name || !phone || !role) {
+  if (!email || !password || !name || !phone) {
     return res.status(400).json({ msg: 'Please enter all required fields' });
   }
 
@@ -131,7 +131,7 @@ router.post('/register', async (req, res, next) => {
   } catch (err) {
     console.error('Registration error:', err.message);
     console.error('Full error:', err);
-    res.status(500).json({ msg: 'Server error', error: err.message });
+    res.status(500).json({ msg: 'Server error' });
   }
 });
 
@@ -292,13 +292,11 @@ router.post('/resend-verification', async (req, res) => {
   try {
     const { email } = req.body;
 
+    // Don't reveal whether an account exists (same pattern as forgot-password);
+    // already-verified accounts also get the generic response.
     const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    if (user.isEmailVerified) {
-      return res.status(400).json({ error: 'Email is already verified' });
+    if (!user || user.isEmailVerified) {
+      return res.json({ message: 'If that email exists and is not verified, a verification email has been sent.' });
     }
 
     // Generate new verification token
@@ -317,11 +315,11 @@ router.post('/resend-verification', async (req, res) => {
         fullName || user.username,
         verificationToken
       );
-      res.json({ message: 'Verification email sent successfully' });
     } catch (emailError) {
       console.error('Failed to send verification email:', emailError);
-      res.status(500).json({ error: 'Failed to send verification email' });
     }
+
+    res.json({ message: 'If that email exists and is not verified, a verification email has been sent.' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error' });
