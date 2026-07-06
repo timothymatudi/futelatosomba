@@ -36,6 +36,11 @@ coverage/
 # System files
 Thumbs.db
 
+# Installed agent skill packs
+.agents/
+.claude/
+skills-lock.json
+
 # Generated reports and temporary files
 *.md
 *.txt
