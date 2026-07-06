@@ -30,8 +30,12 @@ router.post('/register', async (req, res) => {
             agencyLogo
         } = req.body;
 
+        // Never allow self-registration as admin; only self-service roles are
+        // accepted here. Admin is granted via /api/admin/users/:id/role.
+        const requestedRole = role === 'agent' ? 'agent' : 'user';
+
         // Basic validation for agent fields if role is agent
-        if (role === 'agent') {
+        if (requestedRole === 'agent') {
             if (!agencyName || !licenseNumber || !agencyAddress) {
                 return res.status(400).json({ error: 'Agent-specific fields (agencyName, licenseNumber, agencyAddress) are required for agent registration' });
             }
@@ -58,9 +62,9 @@ router.post('/register', async (req, res) => {
             firstName,
             lastName,
             phone,
-            role: role || 'user', // Default to 'user' if not specified
+            role: requestedRole,
             // Conditionally add agent-specific fields
-            ...(role === 'agent' && {
+            ...(requestedRole === 'agent' && {
                 agencyName,
                 licenseNumber,
                 agencyAddress,
@@ -289,10 +293,17 @@ router.get('/:id/properties', auth, async (req, res) => {
     }
 });
 
-// Get user profile (authenticated — this returns the full user record incl. email
-// and agent details, so it must not be readable without a valid token).
+// Get user profile (authenticated + owner-or-admin). This returns the full user
+// record incl. email and agent details, so a caller may only read their own
+// record — an admin can read anyone's.
 router.get('/:id', auth, async (req, res) => {
     try {
+        const requester = await User.findById(req.user.id).select('role');
+        const isAdmin = requester?.role === 'admin';
+        if (req.user.id !== req.params.id && !isAdmin) {
+            return res.status(403).json({ error: 'You can only view your own profile' });
+        }
+
         const user = await User.findById(req.params.id)
             .populate('properties');
 

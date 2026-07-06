@@ -26,8 +26,12 @@ router.post('/register', async (req, res, next) => {
     return res.status(400).json({ msg: 'Please enter all required fields' });
   }
 
+  // Never allow self-registration as admin; only self-service roles are
+  // accepted here. Admin is granted via /api/admin/users/:id/role.
+  const requestedRole = role === 'agent' ? 'agent' : 'user';
+
   // Additional validation for agent-specific fields
-  if (role === 'agent') {
+  if (requestedRole === 'agent') {
     if (!agencyName || !licenseNumber || !agencyAddress) {
       return res.status(400).json({ msg: 'Agency name, license number, and agency address are required for agents' });
     }
@@ -39,7 +43,7 @@ router.post('/register', async (req, res, next) => {
       return res.status(400).json({ msg: 'User already exists' });
     }
 
-    if (role === 'agent') {
+    if (requestedRole === 'agent') {
       let agent = await User.findOne({ licenseNumber });
       if (agent) {
         return res.status(400).json({ msg: 'License number already in use' });
@@ -62,14 +66,14 @@ router.post('/register', async (req, res, next) => {
       lastName,
       username: email.split('@')[0] + Math.floor(Math.random() * 10000),
       phone,
-      role,
+      role: requestedRole,
       emailVerificationToken: verificationTokenHash,
       emailVerificationExpires: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
       isEmailVerified: false
     };
 
     // Add agent specific fields if role is agent
-    if (role === 'agent') {
+    if (requestedRole === 'agent') {
       newUser.agencyName = agencyName;
       newUser.licenseNumber = licenseNumber;
       newUser.agencyAddress = agencyAddress;
