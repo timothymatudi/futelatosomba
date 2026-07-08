@@ -1,5 +1,23 @@
 // Backend server for futelatosomba with Stripe integration
 require('dotenv').config();
+
+// JWTs protect account access. In production, refuse to boot with a missing or
+// weak secret; in local development, warn so existing short test secrets still
+// work while making the risk visible.
+const isProduction = process.env.NODE_ENV === 'production';
+if (!process.env.JWT_SECRET) {
+    console.error('[FATAL] JWT_SECRET is required.');
+    process.exit(1);
+}
+if (process.env.JWT_SECRET.length < 32) {
+    const message = '[SECURITY] JWT_SECRET should be at least 32 characters.';
+    if (isProduction) {
+        console.error(`[FATAL] ${message}`);
+        process.exit(1);
+    }
+    console.warn(message);
+}
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -102,30 +120,31 @@ app.use(helmet({
     }
 }));
 
-// 2. CORS configuration - Allow multiple origins including Vercel previews
+// 2. CORS configuration - allow only exact, configured origins.
+// Add preview/deployment URLs via CORS_ALLOWED_ORIGINS as a comma-separated
+// list, e.g. https://preview-one.vercel.app,https://preview-two.vercel.app
 const allowedOrigins = [
     'http://localhost:3000',
     'http://localhost:3001',
     process.env.CLIENT_URL,
     process.env.FRONTEND_URL,
-];
+    ...(process.env.CORS_ALLOWED_ORIGINS || '').split(',')
+].map(origin => origin && origin.trim()).filter(Boolean);
 
 app.use(cors({
     origin: (origin, callback) => {
         // Allow requests with no origin (like mobile apps or curl requests)
         if (!origin) return callback(null, true);
 
-        // Allow any Vercel preview deployment
-        if (origin.includes('vercel.app')) {
-            return callback(null, true);
-        }
-
         // Allow configured origins
         if (allowedOrigins.includes(origin)) {
             return callback(null, true);
         }
 
-        callback(new Error('Not allowed by CORS'));
+        // Do not throw here: throwing becomes a 500 in development and can leak
+        // stack traces. Returning false simply omits CORS headers, so browsers
+        // block the cross-origin request.
+        callback(null, false);
     },
     credentials: true, // Allow cookies to be sent
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -173,8 +192,8 @@ app.get('/api/health', (req, res) => {
     });
 });
 
-// Authentication routes
-app.use('/api/auth', authRoutes);
+// Authentication routes - rate limited to slow brute-force and email abuse.
+app.use('/api/auth', authLimiter, authRoutes);
 
 // Property routes - general API rate limiting + CSRF (csurf exempts GET/HEAD/
 // OPTIONS, so public browsing is unaffected; create/update/delete now require a

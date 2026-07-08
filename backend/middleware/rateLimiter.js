@@ -37,14 +37,17 @@ const apiLimiter = createLimiterWithLogging({
     skipFailedRequests: false,
 }, 'General API');
 
-// Strict rate limiter for authentication endpoints - 50 requests per 15 minutes (increased for testing)
+// Strict rate limiter for authentication endpoints - 10/15min in production,
+// 50/15min otherwise so local testing isn't throttled.
 const authLimiter = createLimiterWithLogging({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 50, // Limit each IP to 50 requests per windowMs (increased from 5 for development)
+    max: process.env.NODE_ENV === 'production' ? 10 : 50,
     message: 'Too many authentication attempts from this IP, please try again after 15 minutes',
     standardHeaders: true,
     legacyHeaders: false,
-    skipSuccessfulRequests: false,
+    // Only count failures in production so a shared office/NAT IP with many
+    // legitimate logins is not locked out; brute-force attempts still count.
+    skipSuccessfulRequests: process.env.NODE_ENV === 'production',
     skipFailedRequests: false,
 }, 'Authentication');
 
@@ -81,16 +84,26 @@ const contactLimiter = createLimiterWithLogging({
     skipFailedRequests: false,
 }, 'Contact');
 
-// Very strict limiter for password reset - 3 requests per hour
-const passwordResetLimiter = createLimiterWithLogging({
+// Very strict limiter for password reset flows - 3 requests per hour.
+// Separate instances per route so forgot-password, reset-password and
+// resend-verification each get their own bucket; a normal reset flow
+// (request + a couple of attempts) must not lock users out of the others.
+const passwordResetOptions = {
     windowMs: 60 * 60 * 1000, // 1 hour
-    max: 3, // Limit each IP to 3 password reset requests per hour
+    max: 3, // Limit each IP to 3 requests per hour
     message: 'Too many password reset attempts from this IP, please try again after 1 hour',
     standardHeaders: true,
     legacyHeaders: false,
     skipSuccessfulRequests: false,
     skipFailedRequests: false,
-}, 'Password Reset');
+};
+
+const passwordResetLimiter = createLimiterWithLogging(passwordResetOptions, 'Password Reset');
+const resetPasswordLimiter = createLimiterWithLogging(passwordResetOptions, 'Reset Password');
+const resendVerificationLimiter = createLimiterWithLogging({
+    ...passwordResetOptions,
+    message: 'Too many verification email requests from this IP, please try again after 1 hour',
+}, 'Resend Verification');
 
 // Moderate limiter for property creation - 30 requests per hour
 const propertyCreateLimiter = createLimiterWithLogging({
@@ -110,5 +123,7 @@ module.exports = {
     paymentLimiter,
     contactLimiter,
     passwordResetLimiter,
+    resetPasswordLimiter,
+    resendVerificationLimiter,
     propertyCreateLimiter
 };

@@ -2,13 +2,58 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const { body } = require('express-validator');
 const User = require('../models/User');
 const emailService = require('../services/emailService');
+const {
+  validateEmail,
+  validateLogin,
+  validatePassword,
+  validatePasswordReset,
+  validatePasswordResetRequest,
+  validatePhone,
+  handleValidationErrors
+} = require('../middleware/validation');
+const {
+  passwordResetLimiter,
+  resetPasswordLimiter,
+  resendVerificationLimiter
+} = require('../middleware/rateLimiter');
+
+const validateRegistrationRequest = [
+  ...validateEmail(),
+  ...validatePassword(),
+  body('name')
+    .trim()
+    .isLength({ min: 2, max: 120 })
+    .withMessage('Name must be between 2 and 120 characters'),
+  validatePhone('phone', false),
+  body('role')
+    .optional({ checkFalsy: true })
+    .isIn(['user', 'agent'])
+    .withMessage('Invalid role'),
+  body('agencyName')
+    .optional({ checkFalsy: true })
+    .trim()
+    .isLength({ max: 120 })
+    .withMessage('Agency name is too long'),
+  body('licenseNumber')
+    .optional({ checkFalsy: true })
+    .trim()
+    .isLength({ max: 80 })
+    .withMessage('License number is too long'),
+  body('agencyAddress')
+    .optional({ checkFalsy: true })
+    .trim()
+    .isLength({ max: 300 })
+    .withMessage('Agency address is too long'),
+  handleValidationErrors
+];
 
 // @route   POST api/auth/register
 // @desc    Register a new user
 // @access  Public
-router.post('/register', async (req, res, next) => {
+router.post('/register', validateRegistrationRequest, async (req, res, next) => {
   const {
     email,
     password,
@@ -138,7 +183,7 @@ router.post('/register', async (req, res, next) => {
 // @route   POST api/auth/login
 // @desc    Authenticate user & get token
 // @access  Public
-router.post('/login', async (req, res) => {
+router.post('/login', validateLogin, async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -194,7 +239,7 @@ router.post('/login', async (req, res) => {
 // @route   POST api/auth/forgot-password
 // @desc    Request password reset
 // @access  Public
-router.post('/forgot-password', async (req, res) => {
+router.post('/forgot-password', passwordResetLimiter, validatePasswordResetRequest, async (req, res) => {
   try {
     const { email } = req.body;
 
@@ -231,7 +276,7 @@ router.post('/forgot-password', async (req, res) => {
 // @route   POST api/auth/reset-password/:token
 // @desc    Reset password
 // @access  Public
-router.post('/reset-password/:token', async (req, res) => {
+router.post('/reset-password/:token', resetPasswordLimiter, validatePasswordReset, async (req, res) => {
   try {
     const { password } = req.body;
     const resetTokenHash = crypto.createHash('sha256').update(req.params.token).digest('hex');
@@ -288,7 +333,7 @@ router.get('/verify-email/:token', async (req, res) => {
 // @route   POST api/auth/resend-verification
 // @desc    Resend email verification
 // @access  Public
-router.post('/resend-verification', async (req, res) => {
+router.post('/resend-verification', resendVerificationLimiter, validatePasswordResetRequest, async (req, res) => {
   try {
     const { email } = req.body;
 

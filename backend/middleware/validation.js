@@ -6,15 +6,16 @@ const handleValidationErrors = (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         const ip = req.ip || req.connection.remoteAddress;
-        console.warn(`[SECURITY] Validation failed - IP: ${ip}, Endpoint: ${req.originalUrl}, Errors:`, errors.array());
+        // Never include err.value: it can contain submitted passwords.
+        const details = errors.array().map(err => ({
+            field: err.path,
+            message: err.msg
+        }));
+        console.warn(`[SECURITY] Validation failed - IP: ${ip}, Endpoint: ${req.originalUrl}, Errors:`, details);
 
         return res.status(400).json({
             error: 'Validation failed',
-            details: errors.array().map(err => ({
-                field: err.path,
-                message: err.msg,
-                value: err.value
-            }))
+            details
         });
     }
     next();
@@ -54,7 +55,9 @@ const validateEmail = () => [
         .trim()
         .isEmail()
         .withMessage('Please provide a valid email address')
-        .normalizeEmail()
+        // Only lowercase - normalizeEmail() rewrites gmail addresses (strips
+        // dots/+suffix) and would no longer match emails stored at signup.
+        .toLowerCase()
         .customSanitizer(sanitizeString)
         .isLength({ max: 255 })
         .withMessage('Email is too long')
