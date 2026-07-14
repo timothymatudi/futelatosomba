@@ -7,6 +7,7 @@ import PropertyGallery from '../components/property/PropertyGallery';
 import PropertyInfo from '../components/property/PropertyInfo';
 import ContactAgentCard from '../components/property/ContactAgentCard';
 import ShareButtons from '../components/property/ShareButtons';
+import PropertyCard from '../components/property/PropertyCard';
 import Loading from '../components/common/Loading';
 import { formatPrice, formatAddress } from '../utils/formatters';
 import { LISTING_TYPE_LABELS } from '../utils/constants';
@@ -22,6 +23,7 @@ const PropertyDetails = () => {
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isFavorited, setIsFavorited] = useState(false);
+  const [similarProperties, setSimilarProperties] = useState([]);
 
   const fetchPropertyDetails = useCallback(async () => {
     try {
@@ -46,6 +48,20 @@ const PropertyDetails = () => {
   useEffect(() => {
     fetchPropertyDetails();
   }, [fetchPropertyDetails]); // fetchPropertyDetails is now a stable dependency
+
+  useEffect(() => {
+    const fetchSimilarProperties = async () => {
+      try {
+        const data = await propertyService.getSimilarProperties(id);
+        setSimilarProperties(data.data || []);
+      } catch (error) {
+        console.error('Error fetching similar properties:', error);
+        setSimilarProperties([]);
+      }
+    };
+
+    fetchSimilarProperties();
+  }, [id]);
 
   const handleFavoriteToggle = async () => {
     if (!user) {
@@ -213,11 +229,17 @@ const PropertyDetails = () => {
         </aside>
       </div>
 
-      {/* Similar Properties Section (Placeholder for future implementation) */}
-      <div className="similar-properties-section">
-        <h2>Similar Properties</h2>
-        <p className="coming-soon">Coming soon...</p>
-      </div>
+      {/* Similar Properties Section */}
+      {similarProperties.length > 0 && (
+        <div className="similar-properties-section">
+          <h2>Similar Properties</h2>
+          <div className="similar-properties-grid">
+            {similarProperties.map((similarProperty) => (
+              <PropertyCard key={similarProperty._id} property={similarProperty} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

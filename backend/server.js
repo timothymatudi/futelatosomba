@@ -288,15 +288,15 @@ app.post('/api/create-premium-checkout', [paymentLimiter, ...validatePaymentAmou
                 },
             ],
             mode: 'payment',
-            success_url: `${process.env.CLIENT_URL || 'http://localhost:3000'}/payment-success.html?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${process.env.CLIENT_URL || 'http://localhost:3000'}/index.html`,
+            success_url: `${process.env.CLIENT_URL || 'http://localhost:3000'}/premium?success=true&session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${process.env.CLIENT_URL || 'http://localhost:3000'}/premium?canceled=true`,
             metadata: {
                 type: 'premium_listing',
                 ip: ip
             }
         });
 
-        res.json({ sessionId: session.id });
+        res.json({ sessionId: session.id, url: session.url });
     } catch (error) {
         console.error('Error creating checkout session:', error);
         res.status(500).json({ error: error.message });

@@ -6,6 +6,7 @@ const User = require('../models/User');
 const Property = require('../models/Property');
 const Transaction = require('../models/Transaction');
 const Donation = require('../models/Donation');
+const emailService = require('../services/emailService');
 
 // Apply admin authentication to all routes
 router.use(adminAuth);
@@ -853,13 +854,25 @@ router.post('/broadcast', async (req, res) => {
     // Log broadcast
     console.log(`Broadcast message sent by admin ${req.user.username} to ${users.length} users (${targetRole || 'all'}): ${message}`);
 
-    // TODO: Implement actual email/notification sending
-    // For now, just return success
+    // Send broadcast emails in batches; individual failures don't fail the request
+    let sent = 0;
+    let failed = 0;
+    const batchSize = 10;
+    for (let i = 0; i < users.length; i += batchSize) {
+      const batch = users.slice(i, i + batchSize);
+      const results = await Promise.allSettled(
+        batch.map(u => emailService.sendBroadcastEmail(u.email, u.username, message))
+      );
+      sent += results.filter(r => r.status === 'fulfilled').length;
+      failed += results.filter(r => r.status === 'rejected').length;
+    }
 
     res.json({
       success: true,
       msg: 'Broadcast sent successfully',
-      recipientCount: users.length
+      recipientCount: users.length,
+      sent,
+      failed
     });
   } catch (err) {
     console.error('Error sending broadcast:', err);

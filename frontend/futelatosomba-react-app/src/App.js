@@ -34,6 +34,9 @@ import PropertyValuation from './pages/PropertyValuation';
 import VerifyEmail from './pages/VerifyEmail';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import Donate from './pages/Donate';
+import Premium from './pages/Premium';
+import AdminDashboard from './pages/AdminDashboard';
 
 function App() {
   return (
@@ -58,6 +61,8 @@ function App() {
                   <Route path="/find-agents" element={<FindAgents />} />
                   <Route path="/house-prices" element={<HousePrices />} />
                   <Route path="/valuation" element={<PropertyValuation />} />
+                  <Route path="/donate" element={<Donate />} />
+                  <Route path="/premium" element={<Premium />} />
 
                   {/* Auth Pages */}
                   <Route path="/verify-email" element={<VerifyEmail />} />
@@ -98,6 +103,16 @@ function App() {
                     element={
                       <ProtectedRoute requireAgent={true}>
                         <EditProperty />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  {/* Protected Admin Routes */}
+                  <Route
+                    path="/admin"
+                    element={
+                      <ProtectedRoute requireAdmin={true}>
+                        <AdminDashboard />
                       </ProtectedRoute>
                     }
                   />

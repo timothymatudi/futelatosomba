@@ -14,14 +14,29 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
+// Coordinates can arrive as a GeoJSON array ([lng, lat]) or as the model's
+// object shape ({ lat, lng }). Normalize both to [lat, lng] for Leaflet.
+const getLatLng = (property) => {
+  const coords = property?.location?.coordinates;
+  if (!coords) return null;
+  if (Array.isArray(coords) && coords.length === 2) {
+    const [lng, lat] = coords;
+    if (typeof lat === 'number' && typeof lng === 'number') return [lat, lng];
+    return null;
+  }
+  if (typeof coords.lat === 'number' && typeof coords.lng === 'number') {
+    return [coords.lat, coords.lng];
+  }
+  return null;
+};
+
 const PropertyMap = ({ properties, center, zoom = 12, height = '400px' }) => {
   // Default to Kinshasa coordinates if no center provided
   const defaultCenter = center || [-4.3276, 15.3136];
 
-  // If single property with coordinates, use those
-  const mapCenter = properties && properties.length === 1 && properties[0].location?.coordinates
-    ? [properties[0].location.coordinates[1], properties[0].location.coordinates[0]]
-    : defaultCenter;
+  // If single property with coordinates, center the map on it
+  const singleLatLng = properties && properties.length === 1 ? getLatLng(properties[0]) : null;
+  const mapCenter = singleLatLng || defaultCenter;
 
   return (
     <div className="property-map" style={{ height }}>
@@ -37,12 +52,11 @@ const PropertyMap = ({ properties, center, zoom = 12, height = '400px' }) => {
         />
 
         {properties && properties.map((property) => {
-          if (!property.location?.coordinates) return null;
-
-          const [lng, lat] = property.location.coordinates;
+          const latLng = getLatLng(property);
+          if (!latLng) return null;
 
           return (
-            <Marker key={property._id} position={[lat, lng]}>
+            <Marker key={property._id} position={latLng}>
               <Popup>
                 <div className="map-popup">
                   <h4 className="popup-title">{property.title}</h4>
@@ -50,8 +64,8 @@ const PropertyMap = ({ properties, center, zoom = 12, height = '400px' }) => {
                     {formatPrice(property.price, property.listingType, property.currency)}
                   </p>
                   <p className="popup-location">
-                    {property.commune && `${property.commune}, `}
-                    {property.city}
+                    {property.location?.address && `${property.location.address}, `}
+                    {property.location?.city}
                   </p>
                   <Link to={`/properties/${property._id}`} className="popup-link">
                     View Details

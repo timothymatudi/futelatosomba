@@ -25,6 +25,12 @@ const propertyService = {
     };
   },
 
+  // Get similar properties for a property details page
+  getSimilarProperties: async (id, limit = 4) => {
+    const response = await api.get(`/properties/${id}/similar?limit=${limit}`);
+    return response.data;
+  },
+
   // Create new property
   createProperty: async (propertyData) => {
     const response = await api.post('/properties', propertyData);

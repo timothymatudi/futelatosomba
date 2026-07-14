@@ -721,10 +721,65 @@ L'équipe Futelatosomba
   }
 };
 
+/**
+ * Send broadcast email
+ * @param {string} email - User email
+ * @param {string} name - User name
+ * @param {string} message - Broadcast message
+ */
+const escapeHtml = (str) => String(str)
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;')
+  .replace(/'/g, '&#39;');
+
+const sendBroadcastEmail = async (email, name, message) => {
+  const safeName = escapeHtml(name);
+  const safeMessage = escapeHtml(message).replace(/\n/g, '<br>');
+  const mailOptions = {
+    from: `"Futelatosomba" <${process.env.EMAIL_FROM || 'noreply@futelatosomba.com'}>`,
+    to: email,
+    subject: 'Annonce - Futelatosomba',
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6;">
+        <p>Bonjour ${safeName},</p>
+        <p>${safeMessage}</p>
+        <p>Cordialement,<br>L'équipe Futelatosomba</p>
+      </body>
+      </html>
+    `,
+    text: `
+Bonjour ${name},
+
+${message}
+
+Cordialement,
+L'équipe Futelatosomba
+    `
+  };
+
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Broadcast email sent:', info.messageId);
+    return info;
+  } catch (error) {
+    console.error('Error sending broadcast email:', error);
+    throw error;
+  }
+};
+
 module.exports = {
   sendVerificationEmail,
   sendPasswordResetEmail,
   sendPropertyAlertEmail,
   sendContactAgentEmail,
-  sendInquiryConfirmationEmail
+  sendInquiryConfirmationEmail,
+  sendBroadcastEmail
 };

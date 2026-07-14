@@ -1,0 +1,128 @@
+.premium-page {
+  min-height: calc(100vh - 70px);
+}
+
+.premium-hero {
+  background: linear-gradient(135deg, #007FFF 0%, #0066CC 100%);
+  color: #ffffff;
+  padding: 80px 20px;
+  text-align: center;
+}
+
+.premium-title {
+  font-size: 48px;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+}
+
+.premium-subtitle {
+  font-size: 20px;
+  margin: 0;
+  opacity: 0.95;
+}
+
+.premium-content {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 60px;
+  padding: 60px 0;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.premium-benefits-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 24px 0;
+}
+
+.premium-benefits-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.premium-benefits-list li {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #666666;
+  padding-left: 32px;
+  position: relative;
+}
+
+.premium-benefits-list li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #28a745;
+  font-weight: 700;
+}
+
+.premium-card {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  align-self: start;
+}
+
+.premium-price {
+  text-align: center;
+}
+
+.premium-price-amount {
+  display: block;
+  font-size: 48px;
+  font-weight: 700;
+  color: #007FFF;
+}
+
+.premium-price-label {
+  font-size: 14px;
+  color: #666666;
+}
+
+.premium-property-select {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.premium-property-select select {
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 16px;
+  color: #1a1a1a;
+  background: #ffffff;
+}
+
+.premium-login-prompt {
+  text-align: center;
+  font-size: 16px;
+  color: #666666;
+  margin: 0;
+}
+
+.premium-login-prompt a {
+  color: #007FFF;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .premium-title {
+    font-size: 32px;
+  }
+
+  .premium-content {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+}
