@@ -35,7 +35,7 @@ const HousePrices = () => {
       if (filters.search) params.append('search', filters.search);
 
       const response = await api.get(`/properties?${params.toString()}`);
-      setSoldProperties(response.data.data || []);
+      setSoldProperties(response.data.properties || []);
     } catch (error) {
       toast.error('Failed to load sold properties');
     } finally {

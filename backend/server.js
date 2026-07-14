@@ -35,6 +35,7 @@ const propertyRoutes = require('./routes/properties');
 const userRoutes = require('./routes/users');
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
+const valuationRoutes = require('./routes/valuations');
 
 // Import security middleware
 const csurf = require('csurf');
@@ -205,6 +206,10 @@ app.use('/api/users', apiLimiter, csrfProtection, userRoutes);
 
 // Admin routes - general API rate limiting
 app.use('/api/admin', apiLimiter, adminRoutes);
+
+// Valuation routes - general API rate limiting + CSRF (frontend api client
+// attaches the CSRF token automatically)
+app.use('/api/valuations', apiLimiter, csrfProtection, valuationRoutes);
 
 // Payment Endpoints with rate limiting and validation
 

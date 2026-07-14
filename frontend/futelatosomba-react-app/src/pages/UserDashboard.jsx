@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import propertyService from '../services/propertyService';
+import api from '../services/api';
 import SavedPropertyCard from '../components/dashboard/SavedPropertyCard';
 import SavedSearchCard from '../components/dashboard/SavedSearchCard';
 import RecentlyViewedCard from '../components/dashboard/RecentlyViewedCard';
@@ -38,10 +39,9 @@ const UserDashboard = () => {
       const favoritesResponse = await propertyService.getUserFavorites();
       setSavedProperties(favoritesResponse.data || []);
 
-      // Fetch saved searches (placeholder - will need backend endpoint)
-      // For now, use localStorage
-      const savedSearchesData = JSON.parse(localStorage.getItem('savedSearches') || '[]');
-      setSavedSearches(savedSearchesData);
+      // Fetch saved searches
+      const searchesResponse = await api.get('/users/searches');
+      setSavedSearches((searchesResponse.data || []).map(s => ({ ...s.query, _id: s._id, name: s.name })));
 
       // Fetch recently viewed properties (from localStorage)
       const recentlyViewedData = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
@@ -65,11 +65,14 @@ const UserDashboard = () => {
     }
   };
 
-  const handleDeleteSearch = (searchId) => {
-    const updatedSearches = savedSearches.filter(s => s._id !== searchId);
-    setSavedSearches(updatedSearches);
-    localStorage.setItem('savedSearches', JSON.stringify(updatedSearches));
-    toast.success('Saved search deleted');
+  const handleDeleteSearch = async (searchId) => {
+    try {
+      await api.delete(`/users/searches/${searchId}`);
+      setSavedSearches(prev => prev.filter(s => s._id !== searchId));
+      toast.success('Saved search deleted');
+    } catch (error) {
+      toast.error('Failed to delete saved search');
+    }
   };
 
   const handleEditSearch = (search) => {

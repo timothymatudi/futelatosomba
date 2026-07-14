@@ -647,6 +647,64 @@ router.get('/user/my-properties', agentAuth, async (req, res) => {
     }
 });
 
+// Get similar active properties for a listing.
+// Prioritizes same city/type/listing type, then falls back to broader matches.
+router.get('/:id/similar', async (req, res) => {
+    try {
+        const { limit = 4 } = req.query;
+        const limitNum = Math.min(Math.max(parseInt(limit, 10) || 4, 1), 12);
+
+        const property = await Property.findById(req.params.id);
+        if (!property) {
+            return res.status(404).json({ error: 'Property not found' });
+        }
+
+        const baseMatch = {
+            _id: { $ne: property._id },
+            status: 'active',
+            listingType: property.listingType
+        };
+
+        const matchConditions = [
+            {
+                ...baseMatch,
+                propertyType: property.propertyType,
+                'location.city': property.location?.city
+            },
+            {
+                ...baseMatch,
+                propertyType: property.propertyType
+            },
+            baseMatch
+        ];
+
+        const seen = new Set();
+        const similar = [];
+
+        for (const match of matchConditions) {
+            if (similar.length >= limitNum) break;
+
+            const candidates = await Property.find(match)
+                .sort({ isPremium: -1, createdAt: -1 })
+                .limit(limitNum * 2)
+                .populate('owner', 'username email firstName lastName phone agencyName licenseNumber agencyAddress agencyLogo');
+
+            candidates.forEach((candidate) => {
+                const id = candidate._id.toString();
+                if (!seen.has(id) && similar.length < limitNum) {
+                    seen.add(id);
+                    similar.push(candidate);
+                }
+            });
+        }
+
+        res.json({ data: similar });
+    } catch (error) {
+        console.error('Error fetching similar properties:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Get single property by ID
 router.get('/:id', async (req, res) => {
     try {
@@ -955,6 +1013,43 @@ router.get('/stats/overview', async (req, res) => {
         res.json(stats[0] || {}); // Return the first (and only) result, or empty object if no properties
     } catch (error) {
         console.error('Error fetching stats:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get sold property statistics (used by the House Prices page).
+// The model has no soldAt field, so "this month" is based on updatedAt.
+router.get('/stats/sold', async (req, res) => {
+    try {
+        const startOfMonth = new Date();
+        startOfMonth.setDate(1);
+        startOfMonth.setHours(0, 0, 0, 0);
+
+        const stats = await Property.aggregate([
+            { $match: { status: 'sold' } },
+            {
+                $group: {
+                    _id: null,
+                    totalSold: { $sum: 1 },
+                    averagePrice: { $avg: '$price' },
+                    thisMonth: {
+                        $sum: { $cond: [{ $gte: ['$updatedAt', startOfMonth] }, 1, 0] }
+                    }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    totalSold: 1,
+                    averagePrice: { $round: ['$averagePrice'] },
+                    thisMonth: 1
+                }
+            }
+        ]);
+
+        res.json({ data: stats[0] || { totalSold: 0, averagePrice: 0, thisMonth: 0 } });
+    } catch (error) {
+        console.error('Error fetching sold stats:', error);
         res.status(500).json({ error: error.message });
     }
 });

@@ -139,6 +139,48 @@ router.delete('/alerts/:id', auth, async (req, res) => {
     }
 });
 
+// List agents (public directory). Must be defined before the /:id routes.
+// city is matched against the agency address (the model has no city field);
+// search matches name/username/agency. Sensitive fields are never selected.
+router.get('/agents', async (req, res) => {
+    try {
+        const { city, search } = req.query;
+        const query = { role: 'agent' };
+
+        if (city) {
+            query.agencyAddress = new RegExp(String(city).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+        }
+        if (search) {
+            const searchRegex = new RegExp(String(search).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+            query.$or = [
+                { username: searchRegex },
+                { firstName: searchRegex },
+                { lastName: searchRegex },
+                { agencyName: searchRegex }
+            ];
+        }
+
+        const agents = await User.find(query)
+            .select('username firstName lastName email phone agencyName agencyAddress agencyLogo properties');
+
+        res.json({
+            data: agents.map((agent) => ({
+                _id: agent._id,
+                fullName: [agent.firstName, agent.lastName].filter(Boolean).join(' ') || agent.username,
+                agencyName: agent.agencyName,
+                city: agent.agencyAddress,
+                phoneNumber: agent.phone,
+                email: agent.email,
+                profileImage: agent.agencyLogo,
+                propertyCount: agent.properties ? agent.properties.length : 0
+            }))
+        });
+    } catch (error) {
+        console.error('Error fetching agents:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 // Get user's properties (authenticated — consistent with the other /:id routes)
 router.get('/:id/properties', auth, async (req, res) => {
     try {
