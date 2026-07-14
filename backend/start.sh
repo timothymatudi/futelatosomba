@@ -4,20 +4,33 @@
 cd "$(dirname "$0")"
 
 # Startup script for Render deployment
-# Sets environment variables and starts the server
+#
+# SECURITY: Do NOT hardcode secrets in this file. Set the following as
+# environment variables in the hosting dashboard (Render) or a local, git-ignored
+# .env file:
+#   MONGO_DATABASE_URL, JWT_SECRET, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET,
+#   SMTP_HOST, SMTP_USER, SMTP_PASSWORD, FRONTEND_URL, CLIENT_URL
+#
+# For local development you can create backend/.env (already git-ignored) and it
+# will be loaded by dotenv in server.js.
 
-export MONGO_DATABASE_URL="mongodb+srv://timomatudi_db_user:LUBUZi1044%40%29@cluster0.iuhojxz.mongodb.net/futelatosomba"
-export JWT_SECRET="futelatosomba_super_secure_jwt_secret_key_2024_production_v1"
-export FRONTEND_URL="https://futelatosomba-frontend.vercel.app"
-export CLIENT_URL="https://futelatosomba-frontend.vercel.app"
-export NODE_ENV="development" # Changed to development for local testing
+export FRONTEND_URL="${FRONTEND_URL:-http://localhost:3000}"
+export CLIENT_URL="${CLIENT_URL:-http://localhost:3000}"
+export NODE_ENV="${NODE_ENV:-development}"
 export PORT="${PORT:-3001}" # Default to port 3001 for local development
+
+# Fail fast if required secrets are missing rather than starting insecurely.
+if [ -z "$MONGO_DATABASE_URL" ] || [ -z "$JWT_SECRET" ]; then
+  echo "ERROR: MONGO_DATABASE_URL and JWT_SECRET must be set (env or backend/.env)." >&2
+  echo "Set them in the hosting dashboard or a git-ignored .env file." >&2
+  exit 1
+fi
 
 echo "=========================================="
 echo "Starting Futelatosomba Backend"
-echo "Environment variables set:"
-echo "MONGO_DATABASE_URL: ${MONGO_DATABASE_URL:0:50}..."
-echo "JWT_SECRET: [HIDDEN]"
+echo "Environment:"
+echo "MONGO_DATABASE_URL: [SET]"
+echo "JWT_SECRET: [SET]"
 echo "FRONTEND_URL: $FRONTEND_URL"
 echo "NODE_ENV: $NODE_ENV"
 echo "PORT: $PORT"
