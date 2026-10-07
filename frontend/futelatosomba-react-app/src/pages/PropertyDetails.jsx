@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { lazy, Suspense, useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -14,6 +14,11 @@ import { LISTING_TYPE_LABELS } from '../utils/constants';
 import { toast } from 'react-toastify';
 import './PropertyDetails.css';
 
+// Leaflet is relatively large and ships as ESM. Load it only on detail pages
+// that actually have coordinates; this also keeps the Jest app-shell test from
+// evaluating browser-only map code.
+const PropertyMap = lazy(() => import('../components/property/PropertyMap'));
+
 const PropertyDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -24,6 +29,10 @@ const PropertyDetails = () => {
   const [loading, setLoading] = useState(true);
   const [isFavorited, setIsFavorited] = useState(false);
   const [similarProperties, setSimilarProperties] = useState([]);
+  const coordinates = property?.location?.coordinates;
+  const hasCoordinates = Array.isArray(coordinates)
+    ? coordinates.length === 2 && coordinates.every(Number.isFinite)
+    : Number.isFinite(coordinates?.lat) && Number.isFinite(coordinates?.lng);
 
   const fetchPropertyDetails = useCallback(async () => {
     try {
@@ -228,6 +237,16 @@ const PropertyDetails = () => {
           <ContactAgentCard property={property} />
         </aside>
       </div>
+
+      {hasCoordinates && (
+        <section className="property-location-section" aria-labelledby="property-location-heading">
+          <h2 id="property-location-heading">Property Location</h2>
+          <p>{formatAddress(property.location)}</p>
+          <Suspense fallback={<div className="map-loading">Loading map…</div>}>
+            <PropertyMap properties={[property]} zoom={15} height="380px" />
+          </Suspense>
+        </section>
+      )}
 
       {/* Similar Properties Section */}
       {similarProperties.length > 0 && (

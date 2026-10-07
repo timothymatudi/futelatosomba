@@ -1,18 +1,32 @@
-import React, { useEffect, useState } from 'react'; // Added useState
+import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProperty } from '../context/PropertyContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
+import userService from '../services/userService';
 import PropertyList from '../components/property/PropertyList';
 import PropertyFilters from '../components/property/PropertyFilters';
 import Button from '../components/common/Button';
+import { toast } from 'react-toastify';
 import './Home.css';
+
+const PropertyMap = lazy(() => import('../components/property/PropertyMap'));
 
 const Home = () => {
   const { properties, loading, filters, fetchProperties, updateFilters, resetFilters } = useProperty();
   const { t } = useLanguage();
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   const [overviewStats, setOverviewStats] = useState(null); // State for overview stats
+  const [viewMode, setViewMode] = useState('list');
+  const visibleProperties = (properties || []).slice(0, 12);
+  const mappedProperties = visibleProperties.filter((property) => {
+    const coordinates = property?.location?.coordinates;
+    return Array.isArray(coordinates)
+      ? coordinates.length === 2 && coordinates.every(Number.isFinite)
+      : Number.isFinite(coordinates?.lat) && Number.isFinite(coordinates?.lng);
+  });
 
   const fetchOverviewStats = async () => {
     try {
@@ -42,6 +56,37 @@ const Home = () => {
   const handleResetFilters = () => {
     resetFilters();
     fetchProperties({}, 1);
+  };
+
+  const getActiveFilters = () => Object.fromEntries(
+    Object.entries(filters || {}).filter(([, value]) => value !== '' && value !== null && value !== undefined && value !== false)
+  );
+
+  const handleCreateAlert = async () => {
+    if (!isAuthenticated) {
+      toast.info('Please login to create property alerts');
+      navigate('/login');
+      return;
+    }
+
+    const query = getActiveFilters();
+    const alertName = [
+      query.search || query.city || 'Property',
+      query.listingType ? `for ${query.listingType}` : '',
+      query.maxPrice ? `under ${query.maxPrice}` : ''
+    ].filter(Boolean).join(' ');
+
+    try {
+      await userService.createPropertyAlert({
+        name: alertName,
+        query,
+        frequency: 'instant'
+      });
+      toast.success('Email alert created. New matching properties will be sent to you.');
+    } catch (error) {
+      console.error('Error creating property alert:', error);
+      toast.error(error.response?.data?.error || 'Failed to create property alert');
+    }
   };
 
   const heroStyle = {
@@ -104,8 +149,11 @@ const Home = () => {
         <div className="container">
           <div className="section-header">
             <h2 className="section-title">{t('featured')} {t('properties')}</h2>
-            <Button variant="outline" onClick={() => navigate('/properties')}>
-              {t('viewMap')}
+            <Button
+              variant="outline"
+              onClick={() => setViewMode((current) => current === 'list' ? 'map' : 'list')}
+            >
+              {viewMode === 'list' ? t('viewMap') : 'View List'}
             </Button>
           </div>
 
@@ -114,12 +162,29 @@ const Home = () => {
             onFilterChange={handleFilterChange}
             onApply={handleApplyFilters}
             onReset={handleResetFilters}
+            onCreateAlert={handleCreateAlert}
           />
 
-          <PropertyList
-            properties={ (properties || []).slice(0, 12) }
-            loading={loading}
-          />
+          {viewMode === 'list' ? (
+            <PropertyList
+              properties={visibleProperties}
+              loading={loading}
+            />
+          ) : (
+            <div className="property-map-results">
+              {loading ? (
+                <div className="map-status">Loading properties…</div>
+              ) : mappedProperties.length > 0 ? (
+                <Suspense fallback={<div className="map-status">Loading map…</div>}>
+                  <PropertyMap properties={mappedProperties} zoom={11} height="600px" />
+                </Suspense>
+              ) : (
+                <div className="map-status">
+                  No mapped properties match the current filters.
+                </div>
+              )}
+            </div>
+          )}
 
           {(properties || []).length > 12 && (
             <div className="view-all-container">

@@ -1,0 +1,141 @@
+.mortgage-page {
+  min-height: 100vh;
+  background: #f5f7fb;
+}
+
+.mortgage-hero {
+  background: linear-gradient(135deg, #007fff, #005bb5);
+  color: white;
+  padding: 64px 20px;
+  text-align: center;
+}
+
+.mortgage-hero h1 {
+  font-size: 42px;
+  margin: 0 0 12px;
+}
+
+.mortgage-hero p {
+  font-size: 18px;
+  margin: 0;
+  opacity: 0.95;
+}
+
+.mortgage-container {
+  max-width: 1180px;
+  margin: -36px auto 48px;
+  padding: 0 20px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.9fr);
+  gap: 24px;
+}
+
+.mortgage-panel,
+.mortgage-results {
+  background: white;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.10);
+}
+
+.mortgage-panel h2 {
+  margin: 0 0 24px;
+  color: #1f2937;
+}
+
+.mortgage-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.mortgage-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #374151;
+  font-weight: 600;
+}
+
+.mortgage-form input {
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 13px 14px;
+  font-size: 16px;
+}
+
+.mortgage-form input:focus {
+  border-color: #007fff;
+  box-shadow: 0 0 0 3px rgba(0, 127, 255, 0.12);
+  outline: none;
+}
+
+.mortgage-results {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.result-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.result-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 18px;
+  background: #fafafa;
+}
+
+.result-card.primary {
+  background: linear-gradient(135deg, #111827, #1f2937);
+  color: white;
+}
+
+.result-card.good {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+}
+
+.result-card.warning {
+  background: #fff7ed;
+  border-color: #fed7aa;
+}
+
+.result-card span {
+  display: block;
+  font-size: 13px;
+  opacity: 0.76;
+  margin-bottom: 8px;
+}
+
+.result-card strong {
+  display: block;
+  font-size: 24px;
+  color: inherit;
+}
+
+.mortgage-note {
+  margin: 4px 0 0;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.mortgage-disclaimer {
+  margin: 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+@media (max-width: 860px) {
+  .mortgage-container {
+    grid-template-columns: 1fr;
+  }
+
+  .mortgage-form,
+  .result-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -39,8 +39,8 @@ export const PropertyProvider = ({ children }) => {
     features: [], // Added
     minYearBuilt: '', // Added
     maxYearBuilt: '', // Added
-    status: '', // Added
-    isPremium: false, // Added, boolean type
+    status: 'active',
+    isPremium: '',
     owner: '', // Added
     sortBy: 'createdAt',
     sortOrder: 'desc'
@@ -294,8 +294,8 @@ export const PropertyProvider = ({ children }) => {
       features: [], // Added
       minYearBuilt: '', // Added
       maxYearBuilt: '', // Added
-      status: '', // Added
-      isPremium: false, // Added, boolean type
+      status: 'active',
+      isPremium: '',
       owner: '', // Added
       sortBy: 'createdAt',
       sortOrder: 'desc'

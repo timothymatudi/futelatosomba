@@ -7,9 +7,35 @@ const Property = require('../models/Property');
 const Transaction = require('../models/Transaction');
 const Donation = require('../models/Donation');
 const emailService = require('../services/emailService');
+const { processPropertyAlerts } = require('../utils/propertyAlertScheduler');
 
 // Apply admin authentication to all routes
 router.use(adminAuth);
+
+/**
+ * @route   POST /api/admin/alerts/run
+ * @desc    Manually run property alert matching/delivery
+ * @access  Admin only
+ */
+router.post('/alerts/run', async (req, res) => {
+  try {
+    const dryRun = req.body?.dryRun === true;
+    const summary = await processPropertyAlerts({ dryRun });
+
+    res.json({
+      success: true,
+      dryRun,
+      summary
+    });
+  } catch (error) {
+    console.error('Error running property alerts:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to run property alerts',
+      message: error.message
+    });
+  }
+});
 
 /**
  * @route   GET /api/admin/stats
@@ -829,7 +855,7 @@ router.get('/activity-log', async (req, res) => {
 
 /**
  * @route   POST /api/admin/broadcast
- * @desc    Send broadcast notification to users (placeholder for future implementation)
+ * @desc    Send a broadcast email notification to selected users
  * @access  Admin only
  */
 router.post('/broadcast', async (req, res) => {

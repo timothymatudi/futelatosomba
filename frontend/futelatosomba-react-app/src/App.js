@@ -31,6 +31,7 @@ import MarketDataPage from './pages/MarketDataPage';
 import FindAgents from './pages/FindAgents';
 import HousePrices from './pages/HousePrices';
 import PropertyValuation from './pages/PropertyValuation';
+import MortgageCalculator from './pages/MortgageCalculator';
 import VerifyEmail from './pages/VerifyEmail';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
@@ -61,6 +62,7 @@ function App() {
                   <Route path="/find-agents" element={<FindAgents />} />
                   <Route path="/house-prices" element={<HousePrices />} />
                   <Route path="/valuation" element={<PropertyValuation />} />
+                  <Route path="/mortgage-calculator" element={<MortgageCalculator />} />
                   <Route path="/donate" element={<Donate />} />
                   <Route path="/premium" element={<Premium />} />
 

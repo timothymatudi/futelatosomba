@@ -184,6 +184,12 @@ router.get('/agents', async (req, res) => {
 // Get user's properties (authenticated — consistent with the other /:id routes)
 router.get('/:id/properties', auth, async (req, res) => {
     try {
+        const requester = await User.findById(req.user.id).select('role');
+        const isAdmin = requester?.role === 'admin';
+        if (req.user.id !== req.params.id && !isAdmin) {
+            return res.status(403).json({ error: 'You can only view your own property management list' });
+        }
+
         const properties = await Property.find({ owner: req.params.id })
             .sort({ createdAt: -1 });
 

@@ -43,6 +43,7 @@ skills-lock.json
 
 # Generated reports and temporary files
 *.md
+!PROGRESS_ASSISTANT.md
 *.txt
 *.sh
 frontend/package-lock.json

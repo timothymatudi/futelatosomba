@@ -143,6 +143,16 @@ const propertySchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    // "New & exclusive" support (inspired by OnTheMarket). Exclusive listings
+    // can be surfaced first and badged; newListingUntil marks the window during
+    // which a listing is considered "new".
+    isExclusive: {
+        type: Boolean,
+        default: false
+    },
+    newListingUntil: {
+        type: Date
+    },
     premiumExpiresAt: {
         type: Date
     },
@@ -184,11 +194,13 @@ const propertySchema = new mongoose.Schema({
 
 // Pre-save middleware to automatically populate geoLocation from coordinates
 propertySchema.pre('save', function(next) {
-    if (this.location && this.location.coordinates && this.location.coordinates.lat && this.location.coordinates.lng) {
+    const lat = this.location?.coordinates?.lat;
+    const lng = this.location?.coordinates?.lng;
+    if (Number.isFinite(lat) && Number.isFinite(lng)) {
         // GeoJSON format uses [longitude, latitude] order
         this.location.geoLocation = {
             type: 'Point',
-            coordinates: [this.location.coordinates.lng, this.location.coordinates.lat]
+            coordinates: [lng, lat]
         };
     }
     next();
@@ -200,6 +212,7 @@ propertySchema.index({ price: 1 });
 propertySchema.index({ propertyType: 1 });
 propertySchema.index({ status: 1 });
 propertySchema.index({ owner: 1 });
+propertySchema.index({ isExclusive: -1, newListingUntil: -1, createdAt: -1 });
 propertySchema.index({ 'location.coordinates.lat': 1, 'location.coordinates.lng': 1 });
 propertySchema.index({ views: -1 });
 // 2dsphere index for geospatial queries
@@ -222,6 +235,11 @@ propertySchema.methods.isPremiumActive = function() {
     if (!this.isPremium) return false;
     if (!this.premiumExpiresAt) return false;
     return new Date() < this.premiumExpiresAt;
+};
+
+// Method to check if the listing should currently show as "new".
+propertySchema.methods.isNewListingActive = function() {
+    return Boolean(this.newListingUntil && new Date() < this.newListingUntil);
 };
 
 // Static method to find properties by location

@@ -472,3 +472,23 @@
     transition: none !important;
   }
 }
+.property-map-results {
+  margin-top: var(--space-xl);
+}
+
+.property-map-results .property-map {
+  overflow: hidden;
+  border: 1px solid #e4e7ec;
+  border-radius: 14px;
+  box-shadow: var(--shadow-md);
+}
+
+.map-status {
+  display: grid;
+  min-height: 360px;
+  place-items: center;
+  border: 1px dashed #cbd5e1;
+  border-radius: 14px;
+  background: #f8fafc;
+  color: #667085;
+}

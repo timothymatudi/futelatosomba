@@ -339,3 +339,31 @@
     white-space: nowrap;
   }
 }
+.property-location-section {
+  margin-top: 2.5rem;
+}
+
+.property-location-section h2 {
+  margin-bottom: 0.35rem;
+}
+
+.property-location-section > p {
+  margin: 0 0 1rem;
+  color: #667085;
+}
+
+.property-location-section .property-map {
+  overflow: hidden;
+  border: 1px solid #e4e7ec;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(16, 24, 40, 0.08);
+}
+
+.map-loading {
+  display: grid;
+  min-height: 380px;
+  place-items: center;
+  border-radius: 14px;
+  background: #f8fafc;
+  color: #667085;
+}

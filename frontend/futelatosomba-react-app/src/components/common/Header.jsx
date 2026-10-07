@@ -99,6 +99,14 @@ const Header = () => {
               Valuation
             </Link>
 
+            <Link
+              to="/mortgage-calculator"
+              className={`nav-link ${isActive('/mortgage-calculator') ? 'nav-active' : ''}`}
+              onClick={closeMobileMenu}
+            >
+              Mortgage
+            </Link>
+
             {isAuthenticated && isAgent() && (
               <Link
                 to="/agent-dashboard"

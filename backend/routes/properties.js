@@ -4,11 +4,51 @@ const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const auth = require('../middleware/auth');
 const agentAuth = require('../middleware/agentAuth');
+const optionalAuth = require('../middleware/optionalAuth');
 const Property = require('../models/Property');
 const User = require('../models/User');
-const fs = require('fs');
 const { upload, uploadPropertyImages } = require('../middleware/upload');
 const emailService = require('../services/emailService');
+const {
+    buildPropertyQuery,
+    escapeRegExp,
+    getSafePropertySortField,
+    getPublicPropertyStatus,
+    isPublicPropertyStatus
+} = require('../utils/buildPropertyQuery');
+const { mergePropertyImages } = require('../utils/mergePropertyImages');
+const { normalizePropertyRequest } = require('../utils/normalizePropertyPayload');
+const { deletePropertyImageFiles } = require('../utils/propertyImageFiles');
+const {
+    canManageProperty,
+    canManageListingPromotion,
+    canSetPropertyStatus
+} = require('../utils/propertyPermissions');
+
+function numberIfProvided(value) {
+    return value === undefined || value === null || value === '' ? undefined : Number(value);
+}
+
+function mergePropertyLocation(currentLocation, requestedLocation) {
+    if (!requestedLocation) return undefined;
+
+    const current = currentLocation?.toObject
+        ? currentLocation.toObject()
+        : (currentLocation || {});
+    const currentCoordinates = current.coordinates || {};
+    const requestedCoordinates = requestedLocation.coordinates || {};
+    const coordinates = { ...currentCoordinates, ...requestedCoordinates };
+    const location = { ...current, ...requestedLocation, coordinates };
+
+    if (Number.isFinite(coordinates.lat) && Number.isFinite(coordinates.lng)) {
+        location.geoLocation = {
+            type: 'Point',
+            coordinates: [coordinates.lng, coordinates.lat]
+        };
+    }
+
+    return location;
+}
 
 
 
@@ -29,7 +69,7 @@ router.get('/nearby', async (req, res) => {
             maxArea,
             features,
             amenities,
-            status = 'active',
+            status,
             isPremium,
             sortBy = 'distance',
             page = 1,
@@ -97,9 +137,7 @@ router.get('/nearby', async (req, res) => {
         if (amenities) {
             matchQuery.amenities = { $all: Array.isArray(amenities) ? amenities : amenities.split(',') };
         }
-        if (status) {
-            matchQuery.status = status;
-        }
+        matchQuery.status = getPublicPropertyStatus(status);
         if (isPremium !== undefined) {
             matchQuery.isPremium = isPremium === 'true';
         }
@@ -132,7 +170,8 @@ router.get('/nearby', async (req, res) => {
         // Add sorting (distance is default, already sorted by $geoNear)
         if (sortBy && sortBy !== 'distance') {
             const sortOrder = req.query.sortOrder === 'desc' ? -1 : 1;
-            pipeline.push({ $sort: { [sortBy]: sortOrder } });
+            const safeSortField = getSafePropertySortField(sortBy, null);
+            if (safeSortField) pipeline.push({ $sort: { [safeSortField]: sortOrder } });
         }
 
         // Count total documents
@@ -216,7 +255,7 @@ router.get('/bounds', async (req, res) => {
             maxArea,
             features,
             amenities,
-            status = 'active',
+            status,
             isPremium,
             sortBy = 'createdAt',
             sortOrder = 'desc',
@@ -296,9 +335,7 @@ router.get('/bounds', async (req, res) => {
         if (amenities) {
             query.amenities = { $all: Array.isArray(amenities) ? amenities : amenities.split(',') };
         }
-        if (status) {
-            query.status = status;
-        }
+        query.status = getPublicPropertyStatus(status);
         if (isPremium !== undefined) {
             query.isPremium = isPremium === 'true';
         }
@@ -309,7 +346,7 @@ router.get('/bounds', async (req, res) => {
 
         const sort = {};
         if (sortBy) {
-            sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
+            sort[getSafePropertySortField(sortBy)] = sortOrder === 'desc' ? -1 : 1;
         }
 
         const properties = await Property.find(query)
@@ -367,6 +404,8 @@ router.get('/', async (req, res) => {
             maxYearBuilt, // Added
             status, // Added
             isPremium, // Added
+            isExclusive,
+            isNew,
             owner, // Added
             sortBy = 'createdAt',
             sortOrder = 'desc',
@@ -401,54 +440,8 @@ router.get('/', async (req, res) => {
             }
 
             // Use aggregation pipeline for location-based sorting
-            const matchQuery = {};
-
-            if (listingType) matchQuery.listingType = listingType;
-            if (propertyType && propertyType !== 'any') matchQuery.propertyType = propertyType;
-            if (city) matchQuery['location.city'] = new RegExp(city, 'i');
-            if (location) matchQuery['location.address'] = new RegExp(location, 'i');
-            if (minPrice) matchQuery.price = { ...matchQuery.price, $gte: Number(minPrice) };
-            if (maxPrice) matchQuery.price = { ...matchQuery.price, $lte: Number(maxPrice) };
-            if (bedrooms) {
-                if (bedrooms === '4+') {
-                    matchQuery.bedrooms = { $gte: 4 };
-                } else if (bedrooms !== 'any') {
-                    matchQuery.bedrooms = { $gte: Number(bedrooms) };
-                }
-            }
-            if (bathrooms) matchQuery.bathrooms = { $gte: Number(bathrooms) };
-            if (minArea) matchQuery.area = { ...matchQuery.area, $gte: Number(minArea) };
-            if (maxArea) matchQuery.area = { ...matchQuery.area, $lte: Number(maxArea) };
-            if (search) {
-                const searchRegExp = new RegExp(search, 'i');
-                matchQuery.$or = [
-                    { title: searchRegExp },
-                    { description: searchRegExp },
-                    { 'location.address': searchRegExp },
-                    { 'location.city': searchRegExp },
-                ];
-            }
-            if (features) {
-                matchQuery.features = { $all: Array.isArray(features) ? features : features.split(',') };
-            }
-            if (amenities) {
-                matchQuery.amenities = { $all: Array.isArray(amenities) ? amenities : amenities.split(',') };
-            }
-            if (minYearBuilt) {
-                matchQuery.yearBuilt = { ...matchQuery.yearBuilt, $gte: Number(minYearBuilt) };
-            }
-            if (maxYearBuilt) {
-                matchQuery.yearBuilt = { ...matchQuery.yearBuilt, $lte: Number(maxYearBuilt) };
-            }
-            if (status) {
-                matchQuery.status = status;
-            }
-            if (isPremium !== undefined) {
-                matchQuery.isPremium = isPremium === 'true';
-            }
-            if (owner) {
-                matchQuery.owner = owner;
-            }
+            const matchQuery = buildPropertyQuery(req.query);
+            matchQuery.status = getPublicPropertyStatus(status);
 
             const pageNum = Math.max(1, Number(page));
             const limitNum = Math.min(50, Math.max(1, Number(limit)));
@@ -478,6 +471,23 @@ router.get('/', async (req, res) => {
             const countPipeline = [...pipeline, { $count: 'total' }];
             const countResult = await Property.aggregate(countPipeline);
             const totalItems = countResult[0]?.total || 0;
+
+            // Add sorting (distance is default, already sorted by $geoNear)
+            if (sortBy === 'newExclusive') {
+                pipeline.push({
+                    $sort: {
+                        isExclusive: -1,
+                        newListingUntil: -1,
+                        isPremium: -1,
+                        createdAt: -1
+                    }
+                });
+            } else if (sortBy && sortBy !== 'distance') {
+                const sortDirection = sortOrder === 'desc' ? -1 : 1;
+                pipeline.push({
+                    $sort: { [getSafePropertySortField(sortBy)]: sortDirection }
+                });
+            }
 
             // Add pagination
             pipeline.push({ $skip: skip });
@@ -529,66 +539,23 @@ router.get('/', async (req, res) => {
         }
 
         // Standard query without location-based sorting
-        const query = {};
-
-        if (listingType) query.listingType = listingType;
-        if (propertyType && propertyType !== 'any') query.propertyType = propertyType;
-        if (city) query['location.city'] = new RegExp(city, 'i');
-        if (location) query['location.address'] = new RegExp(location, 'i');
-        if (minPrice) query.price = { ...query.price, $gte: Number(minPrice) };
-        if (maxPrice) query.price = { ...query.price, $lte: Number(maxPrice) };
-        if (bedrooms) {
-            if (bedrooms === '4+') {
-                query.bedrooms = { $gte: 4 };
-            } else if (bedrooms !== 'any') {
-                query.bedrooms = { $gte: Number(bedrooms) };
-            }
-        }
-        if (bathrooms) query.bathrooms = { $gte: Number(bathrooms) };
-        if (minArea) query.area = { ...query.area, $gte: Number(minArea) };
-        if (maxArea) query.area = { ...query.area, $lte: Number(maxArea) };
-
-        if (search) {
-            const searchRegExp = new RegExp(search, 'i');
-            query.$or = [
-                { title: searchRegExp },
-                { description: searchRegExp },
-                { 'location.address': searchRegExp },
-                { 'location.city': searchRegExp },
-            ];
-        }
-        if (features) {
-            // $all matches if all elements in the array exist
-            query.features = { $all: Array.isArray(features) ? features : features.split(',') };
-        }
-        if (amenities) {
-            // $all matches if all elements in the array exist
-            query.amenities = { $all: Array.isArray(amenities) ? amenities : amenities.split(',') };
-        }
-        if (minYearBuilt) {
-            query.yearBuilt = { ...query.yearBuilt, $gte: Number(minYearBuilt) };
-        }
-        if (maxYearBuilt) {
-            query.yearBuilt = { ...query.yearBuilt, $lte: Number(maxYearBuilt) };
-        }
-        if (status) {
-            query.status = status;
-        }
-        if (isPremium !== undefined) { // Check for undefined, as false is a valid filter
-            query.isPremium = isPremium === 'true'; // Convert string to boolean
-        }
-        if (owner) {
-            query.owner = owner;
-        }
-
+        const query = buildPropertyQuery(req.query);
+        query.status = getPublicPropertyStatus(status);
 
         const pageNum = Math.max(1, Number(page));
         const limitNum = Math.min(50, Math.max(1, Number(limit)));
         const skip = (pageNum - 1) * limitNum;
 
-        const sort = {};
-        if (sortBy) {
-            sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
+        let sort = {};
+        if (sortBy === 'newExclusive') {
+            sort = {
+                isExclusive: -1,
+                newListingUntil: -1,
+                isPremium: -1,
+                createdAt: -1
+            };
+        } else if (sortBy) {
+            sort[getSafePropertySortField(sortBy)] = sortOrder === 'desc' ? -1 : 1;
         }
 
         const properties = await Property.find(query)
@@ -706,11 +673,16 @@ router.get('/:id/similar', async (req, res) => {
 });
 
 // Get single property by ID
-router.get('/:id', async (req, res) => {
+router.get('/:id', optionalAuth, async (req, res) => {
     try {
         const property = await Property.findById(req.params.id)
             .populate('owner', 'username email firstName lastName phone agencyName licenseNumber agencyAddress agencyLogo');
         if (!property) {
+            return res.status(404).json({ error: 'Property not found' });
+        }
+
+        const canPreviewPrivateState = canManageProperty(req.fullUser, property);
+        if (!isPublicPropertyStatus(property.status) && !canPreviewPrivateState) {
             return res.status(404).json({ error: 'Property not found' });
         }
 
@@ -728,6 +700,7 @@ router.get('/:id', async (req, res) => {
 // Create new property (with image upload)
 router.post('/', agentAuth,
     upload.array('images', 20),
+    normalizePropertyRequest,
     [
         body('title').trim().notEmpty().withMessage('Title is required'),
         body('price').isNumeric().withMessage('Price must be a number'),
@@ -740,18 +713,13 @@ router.post('/', agentAuth,
     ],
     uploadPropertyImages,
     async (req, res) => {
+        let propertySaved = false;
         try {
             // Validate input
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
                 // If validation fails, and images were processed, clean them up
-                if (req.processedImages && req.processedImages.length > 0) {
-                    req.processedImages.forEach(img => {
-                        fs.unlink(img.path, (err) => {
-                            if (err) console.error('Error deleting uploaded image:', err);
-                        });
-                    });
-                }
+                await deletePropertyImageFiles((req.processedImages || []).map((img) => img.image));
                 return res.status(400).json({ errors: errors.array() });
             }
 
@@ -771,10 +739,16 @@ router.post('/', agentAuth,
                 amenities,
                 yearBuilt,
                 availableFrom,
-                isPremium // Allow agent to mark as premium
+                isPremium, // Allow agent to mark as premium
+                isExclusive
             } = req.body;
 
             const ownerId = req.fullUser._id; // Get owner from agentAuth middleware
+            const canPromote = canManageListingPromotion(req.fullUser);
+            const premiumFlag = canPromote && (isPremium === true || isPremium === 'true');
+            const exclusiveFlag = isExclusive === true || isExclusive === 'true';
+            const now = new Date();
+            const newListingDays = Number(process.env.NEW_LISTING_DAYS || 2);
 
             const newProperty = new Property({
                 title,
@@ -798,17 +772,30 @@ router.post('/', agentAuth,
                     },
                     zipCode
                 },
-                images: req.processedImages ? req.processedImages.map(img => ({ url: img.image, isPrimary: img.isPrimary })) : [],
-                features: Array.isArray(features) ? features : (features ? features.split(',') : []),
-                amenities: Array.isArray(amenities) ? amenities : (amenities ? amenities.split(',') : []),
+                images: mergePropertyImages({
+                    processedImages: (req.processedImages || []).map((img, index) => ({
+                        ...img,
+                        caption: req.body[`newImageCaption_${index}`] || req.body[`imageCaption_${index}`],
+                        isPrimary: String(req.body.newPrimaryImageIndex ?? req.body.primaryImageIndex) === String(index)
+                    }))
+                }),
+                features: features === undefined
+                    ? undefined
+                    : (Array.isArray(features) ? features : (features ? features.split(',') : [])),
+                amenities: amenities === undefined
+                    ? undefined
+                    : (Array.isArray(amenities) ? amenities : (amenities ? amenities.split(',') : [])),
                 owner: ownerId,
-                yearBuilt: Number(yearBuilt),
-                availableFrom,
-                isPremium: isPremium || false, // Default to false
+                yearBuilt: numberIfProvided(yearBuilt),
+                availableFrom: availableFrom || undefined,
+                isPremium: premiumFlag,
+                isExclusive: canPromote ? exclusiveFlag : false,
+                newListingUntil: new Date(now.getTime() + newListingDays * 24 * 60 * 60 * 1000),
                 status: 'pending' // Initial status for review
             });
 
             await newProperty.save();
+            propertySaved = true;
 
             // Add property to agent's properties array
             req.fullUser.properties.push(newProperty._id);
@@ -820,6 +807,9 @@ router.post('/', agentAuth,
             });
         } catch (error) {
             console.error('Error creating property:', error);
+            if (!propertySaved) {
+                await deletePropertyImageFiles((req.processedImages || []).map((img) => img.image));
+            }
             res.status(500).json({ error: error.message });
         }
     }
@@ -828,6 +818,7 @@ router.post('/', agentAuth,
 // Update property
 router.put('/:id', agentAuth,
     upload.array('images', 20), // Allow image updates
+    normalizePropertyRequest,
     [
         body('title').optional().trim().notEmpty(),
         body('price').optional().isNumeric(),
@@ -840,28 +831,25 @@ router.put('/:id', agentAuth,
     ],
     uploadPropertyImages,
     async (req, res) => {
+        const uploadedImageUrls = (req.processedImages || []).map((img) => img.image);
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
                  // If validation fails, and new images were processed, clean them up
-                 if (req.processedImages && req.processedImages.length > 0) {
-                    req.processedImages.forEach(img => {
-                        fs.unlink(img.path, (err) => {
-                            if (err) console.error('Error deleting temporary uploaded image:', err);
-                        });
-                    });
-                }
+                await deletePropertyImageFiles((req.processedImages || []).map((img) => img.image));
                 return res.status(400).json({ errors: errors.array() });
             }
 
             let property = await Property.findById(req.params.id);
 
             if (!property) {
+                await deletePropertyImageFiles(uploadedImageUrls);
                 return res.status(404).json({ error: 'Property not found' });
             }
 
-            // Authorization check: Only owner (agent) can update their property
-            if (property.owner.toString() !== req.fullUser._id.toString()) {
+            // Owners can manage their own listing; admins can manage any listing.
+            if (!canManageProperty(req.fullUser, property)) {
+                await deletePropertyImageFiles(uploadedImageUrls);
                 return res.status(403).json({ error: 'Not authorized to update this property' });
             }
 
@@ -883,26 +871,48 @@ router.put('/:id', agentAuth,
                 yearBuilt,
                 availableFrom,
                 isPremium,
+                isExclusive,
+                newListingUntil,
                 status // Allow owner to change status
             } = req.body;
+            const canPromote = canManageListingPromotion(req.fullUser);
+            const premiumFlag = canPromote && isPremium !== undefined
+                ? (isPremium === true || isPremium === 'true')
+                : undefined;
+            const exclusiveFlag = canPromote && isExclusive !== undefined
+                ? (isExclusive === true || isExclusive === 'true')
+                : undefined;
+
+            if (!canSetPropertyStatus(req.fullUser, status)) {
+                await deletePropertyImageFiles(uploadedImageUrls);
+                return res.status(403).json({
+                    error: 'Only an admin can approve or return a property to pending status'
+                });
+            }
 
             const updateData = {
                 title,
                 description,
-                price: Number(price),
+                price: numberIfProvided(price),
                 currency,
                 listingType,
                 propertyType,
-                bedrooms: Number(bedrooms),
-                bathrooms: Number(bathrooms),
-                area: Number(area),
+                bedrooms: numberIfProvided(bedrooms),
+                bathrooms: numberIfProvided(bathrooms),
+                area: numberIfProvided(area),
                 areaUnit,
-                location,
-                features: Array.isArray(features) ? features : (features ? features.split(',') : []),
-                amenities: Array.isArray(amenities) ? amenities : (amenities ? amenities.split(',') : []),
-                yearBuilt: Number(yearBuilt),
-                availableFrom,
-                isPremium,
+                location: mergePropertyLocation(property.location, location),
+                features: features === undefined
+                    ? undefined
+                    : (Array.isArray(features) ? features : (features ? features.split(',') : [])),
+                amenities: amenities === undefined
+                    ? undefined
+                    : (Array.isArray(amenities) ? amenities : (amenities ? amenities.split(',') : [])),
+                yearBuilt: numberIfProvided(yearBuilt),
+                availableFrom: availableFrom || undefined,
+                isPremium: premiumFlag,
+                isExclusive: exclusiveFlag,
+                newListingUntil: canPromote && newListingUntil ? new Date(newListingUntil) : undefined,
                 status,
                 updatedAt: Date.now() // Manually update updatedAt
             };
@@ -910,14 +920,23 @@ router.put('/:id', agentAuth,
             // Filter out undefined values
             Object.keys(updateData).forEach(key => updateData[key] === undefined && delete updateData[key]);
 
-            // Handle image updates
-            if (req.processedImages && req.processedImages.length > 0) {
-                const newImages = req.processedImages.map(img => ({ url: img.image, isPrimary: img.isPrimary }));
-                // Decide how to handle existing images. For now, we'll append.
-                // A more robust solution would allow deleting old images or replacing them.
-                updateData.images = [...property.images, ...newImages];
+            // existingImages is the retained/reordered metadata sent by the
+            // editor. New uploads are appended with their own captions.
+            if (req.body.existingImages !== undefined || (req.processedImages && req.processedImages.length > 0)) {
+                const decoratedUploads = (req.processedImages || []).map((img, index) => ({
+                    ...img,
+                    caption: req.body[`newImageCaption_${index}`],
+                    isPrimary: String(req.body.newPrimaryImageIndex) === String(index)
+                }));
+                updateData.images = mergePropertyImages({
+                    currentImages: property.images,
+                    existingImages: req.body.existingImages,
+                    processedImages: decoratedUploads
+                });
             }
 
+
+            const previousImageUrls = property.images.map((image) => image.url);
 
             property = await Property.findByIdAndUpdate(
                 req.params.id,
@@ -925,6 +944,11 @@ router.put('/:id', agentAuth,
                 { new: true, runValidators: true }
             );
 
+            if (updateData.images) {
+                const retainedUrls = new Set(updateData.images.map((image) => image.url));
+                const removedUrls = previousImageUrls.filter((url) => !retainedUrls.has(url));
+                await deletePropertyImageFiles(removedUrls);
+            }
 
             res.json({
                 message: 'Property updated successfully',
@@ -932,6 +956,7 @@ router.put('/:id', agentAuth,
             });
         } catch (error) {
             console.error('Error updating property:', error);
+            await deletePropertyImageFiles(uploadedImageUrls);
             res.status(500).json({ error: error.message });
         }
     }
@@ -946,19 +971,23 @@ router.delete('/:id', agentAuth, async (req, res) => {
             return res.status(404).json({ error: 'Property not found' });
         }
 
-        // Authorization check: Only owner (agent) can delete their property
-        if (property.owner.toString() !== req.fullUser._id.toString()) {
+        // Owners can delete their own listing; admins can delete any listing.
+        if (!canManageProperty(req.fullUser, property)) {
             return res.status(403).json({ error: 'Not authorized to delete this property' });
         }
+
+        const imageUrls = property.images.map((image) => image.url);
 
         // Delete property from MongoDB
         await Property.findByIdAndDelete(req.params.id);
 
-        // Remove property from agent's properties array
-        req.fullUser.properties.pull(req.params.id); // Use .pull() to remove from array
-        await req.fullUser.save();
+        // Remove the property from its actual owner's account. This also works
+        // when an admin deletes a listing owned by someone else.
+        await User.findByIdAndUpdate(property.owner, {
+            $pull: { properties: property._id }
+        });
 
-
+        await deletePropertyImageFiles(imageUrls);
         res.json({ message: 'Property deleted successfully' });
     } catch (error) {
         console.error('Error deleting property:', error);
@@ -1063,7 +1092,7 @@ router.get('/stats/average-price-by-type', async (req, res) => {
         }
 
         const stats = await Property.aggregate([
-            { $match: { 'location.city': new RegExp(city, 'i'), listingType: 'sale' } }, // Only consider 'sale' properties for average price
+            { $match: { 'location.city': new RegExp(escapeRegExp(city), 'i'), listingType: 'sale' } }, // Only consider 'sale' properties for average price
             {
                 $group: {
                     _id: '$propertyType',
@@ -1098,7 +1127,7 @@ router.get('/stats/average-price-by-bedrooms', async (req, res) => {
         }
 
         const stats = await Property.aggregate([
-            { $match: { 'location.city': new RegExp(city, 'i'), bedrooms: { $gte: 0 }, listingType: 'sale' } },
+            { $match: { 'location.city': new RegExp(escapeRegExp(city), 'i'), bedrooms: { $gte: 0 }, listingType: 'sale' } },
             {
                 $group: {
                     _id: '$bedrooms',

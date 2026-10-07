@@ -4,7 +4,7 @@ import { PROPERTY_TYPES, LISTING_TYPES, CITIES, KINSHASA_COMMUNES } from '../../
 import Button from '../common/Button';
 import './PropertyFilters.css';
 
-const PropertyFilters = ({ filters, onFilterChange, onApply, onReset }) => {
+const PropertyFilters = ({ filters, onFilterChange, onApply, onReset, onCreateAlert }) => {
   const { t, getLabel } = useLanguage();
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -219,12 +219,9 @@ const PropertyFilters = ({ filters, onFilterChange, onApply, onReset }) => {
               value={filters.status || ''}
               onChange={(e) => handleInputChange('status', e.target.value)}
             >
-              <option value="">{t('allStatuses')}</option>
               <option value="active">Active</option>
-              <option value="pending">Pending</option>
               <option value="sold">Sold</option>
               <option value="rented">Rented</option>
-              <option value="inactive">Inactive</option>
             </select>
           </div>
 
@@ -233,7 +230,7 @@ const PropertyFilters = ({ filters, onFilterChange, onApply, onReset }) => {
               type="checkbox"
               id="isPremium"
               checked={filters.isPremium || false}
-              onChange={(e) => handleInputChange('isPremium', e.target.checked)}
+              onChange={(e) => handleInputChange('isPremium', e.target.checked ? true : '')}
             />
             <label htmlFor="isPremium">{t('premiumListings')}</label>
           </div>
@@ -243,6 +240,11 @@ const PropertyFilters = ({ filters, onFilterChange, onApply, onReset }) => {
           <Button variant="outline" onClick={handleReset}>
             {t('resetFilters')}
           </Button>
+          {onCreateAlert && (
+            <Button variant="outline" onClick={onCreateAlert}>
+              Create Email Alert
+            </Button>
+          )}
           <Button variant="primary" onClick={handleApply}>
             {t('applyFilters')}
           </Button>

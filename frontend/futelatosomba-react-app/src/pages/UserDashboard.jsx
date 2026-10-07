@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import propertyService from '../services/propertyService';
-import api from '../services/api';
+import userService from '../services/userService';
 import SavedPropertyCard from '../components/dashboard/SavedPropertyCard';
 import SavedSearchCard from '../components/dashboard/SavedSearchCard';
 import RecentlyViewedCard from '../components/dashboard/RecentlyViewedCard';
@@ -19,6 +19,7 @@ const UserDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [savedProperties, setSavedProperties] = useState([]);
   const [savedSearches, setSavedSearches] = useState([]);
+  const [propertyAlerts, setPropertyAlerts] = useState([]);
   const [recentlyViewed, setRecentlyViewed] = useState([]);
 
   useEffect(() => {
@@ -40,8 +41,12 @@ const UserDashboard = () => {
       setSavedProperties(favoritesResponse.data || []);
 
       // Fetch saved searches
-      const searchesResponse = await api.get('/users/searches');
+      const searchesResponse = await userService.getSavedSearches();
       setSavedSearches((searchesResponse.data || []).map(s => ({ ...s.query, _id: s._id, name: s.name })));
+
+      // Fetch property alerts
+      const alertsResponse = await userService.getPropertyAlerts();
+      setPropertyAlerts(alertsResponse.data || []);
 
       // Fetch recently viewed properties (from localStorage)
       const recentlyViewedData = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
@@ -67,12 +72,32 @@ const UserDashboard = () => {
 
   const handleDeleteSearch = async (searchId) => {
     try {
-      await api.delete(`/users/searches/${searchId}`);
+      await userService.deleteSavedSearch(searchId);
       setSavedSearches(prev => prev.filter(s => s._id !== searchId));
       toast.success('Saved search deleted');
     } catch (error) {
       toast.error('Failed to delete saved search');
     }
+  };
+
+  const handleDeleteAlert = async (alertId) => {
+    try {
+      await userService.deletePropertyAlert(alertId);
+      setPropertyAlerts(prev => prev.filter(alert => alert._id !== alertId));
+      toast.success('Property alert deleted');
+    } catch (error) {
+      toast.error('Failed to delete property alert');
+    }
+  };
+
+  const handleRunAlertSearch = (alert) => {
+    const params = new URLSearchParams();
+    Object.entries(alert.query || {}).forEach(([key, value]) => {
+      if (value !== '' && value !== null && value !== undefined && value !== false) {
+        params.append(key, value);
+      }
+    });
+    navigate(`/properties?${params.toString()}`);
   };
 
   const handleEditSearch = (search) => {
@@ -89,6 +114,7 @@ const UserDashboard = () => {
   const stats = {
     savedProperties: savedProperties.length,
     savedSearches: savedSearches.length,
+    propertyAlerts: propertyAlerts.length,
     recentlyViewed: recentlyViewed.length,
   };
 
@@ -140,6 +166,18 @@ const UserDashboard = () => {
           label="Recently Viewed"
           color="#28a745"
         />
+
+        <StatsWidget
+          icon={
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+          }
+          value={stats.propertyAlerts}
+          label="Email Alerts"
+          color="#ff9800"
+        />
       </div>
 
       <div className="dashboard-tabs">
@@ -173,6 +211,17 @@ const UserDashboard = () => {
             <polyline points="12 6 12 12 16 14"></polyline>
           </svg>
           Recently Viewed ({stats.recentlyViewed})
+        </button>
+
+        <button
+          className={`tab-btn ${activeTab === 'alerts' ? 'active' : ''}`}
+          onClick={() => setActiveTab('alerts')}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          Email Alerts ({stats.propertyAlerts})
         </button>
 
         <button
@@ -286,6 +335,68 @@ const UserDashboard = () => {
                     property={item.property}
                     viewedAt={item.viewedAt}
                   />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'alerts' && (
+          <div className="tab-content">
+            <div className="section-header">
+              <h2>Email Property Alerts</h2>
+              <button className="btn-browse" onClick={() => navigate('/properties')}>
+                Create Alert
+              </button>
+            </div>
+
+            {propertyAlerts.length === 0 ? (
+              <div className="empty-state">
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                </svg>
+                <h3>No email alerts yet</h3>
+                <p>Create an alert from the property search filters and we will email you when matching listings appear.</p>
+                <button className="btn-browse" onClick={() => navigate('/properties')}>
+                  Search Properties
+                </button>
+              </div>
+            ) : (
+              <div className="searches-grid">
+                {propertyAlerts.map(alert => (
+                  <div key={alert._id} className="saved-search-card">
+                    <div className="saved-search-header">
+                      <div className="saved-search-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+                          <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        </svg>
+                      </div>
+                      <div className="saved-search-info">
+                        <h3 className="saved-search-name">{alert.name}</h3>
+                        <p className="saved-search-summary">Frequency: {alert.frequency || 'instant'}</p>
+                      </div>
+                    </div>
+                    <div className="saved-search-meta">
+                      {Object.entries(alert.query || {}).filter(([, value]) => value).map(([key, value]) => (
+                        <span key={key} className="saved-search-matches">
+                          {key}: {String(value)}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="saved-search-actions">
+                      <button className="btn-search-action btn-run" onClick={() => handleRunAlertSearch(alert)}>
+                        View matches
+                      </button>
+                      <button className="btn-search-action btn-delete" onClick={() => handleDeleteAlert(alert._id)}>
+                        Delete alert
+                      </button>
+                    </div>
+                    {alert.lastNotifiedAt && (
+                      <p className="saved-search-date">Last sent: {new Date(alert.lastNotifiedAt).toLocaleString()}</p>
+                    )}
+                  </div>
                 ))}
               </div>
             )}

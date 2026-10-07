@@ -2,6 +2,7 @@
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const { deletePropertyImageFiles } = require('../utils/propertyImageFiles');
 
 // Try to load Sharp, but make it optional for Android/Termux environments
 let sharp = null;
@@ -142,14 +143,13 @@ const uploadPropertyImage = async (req, res, next) => {
 
 // Middleware to handle multiple property images upload
 const uploadPropertyImages = async (req, res, next) => {
+    const processedImages = [];
     try {
         // If no files uploaded, skip processing (images are optional in some cases)
         if (!req.files || req.files.length === 0) {
             req.processedImages = [];
             return next();
         }
-
-        const processedImages = [];
 
         // Process each image
         for (const file of req.files) {
@@ -170,6 +170,7 @@ const uploadPropertyImages = async (req, res, next) => {
         next();
     } catch (error) {
         console.error('Error in uploadPropertyImages:', error);
+        await deletePropertyImageFiles(processedImages.map((image) => image.image));
         res.status(500).json({ error: error.message });
     }
 };

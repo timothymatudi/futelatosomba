@@ -33,7 +33,10 @@ const AgentDashboard = () => {
     try {
       setLoading(true);
       const response = await propertyService.getUserProperties(user._id);
-      setProperties(response.data || []);
+      const list = Array.isArray(response)
+        ? response
+        : (response.properties || response.data || []);
+      setProperties(list);
     } catch (error) {
       toast.error('Failed to load properties');
     } finally {

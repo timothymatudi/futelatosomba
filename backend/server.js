@@ -29,6 +29,7 @@ const connectDB = require('./config/mongoose');
 // Import models
 const Donation = require('./models/Donation');
 const Transaction = require('./models/Transaction');
+const { startPropertyAlertScheduler } = require('./utils/propertyAlertScheduler');
 
 // Import routes
 const propertyRoutes = require('./routes/properties');
@@ -57,6 +58,7 @@ const csrfProtection = csurf({ cookie: true });
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const BIND_HOST = process.env.BIND_HOST || '0.0.0.0';
 
 // Trust proxy for Render deployment (fixes rate limiting warnings)
 app.set('trust proxy', 1);
@@ -444,14 +446,14 @@ app.use((req, res) => {
 
 // Start server (only in non-serverless environment)
 if (process.env.VERCEL !== '1') {
-    app.listen(PORT, '0.0.0.0', () => {
+    app.listen(PORT, BIND_HOST, () => {
         console.log('='.repeat(60));
         console.log('  FUTELATOSOMBA BACKEND SERVER');
         console.log('='.repeat(60));
-        console.log(`Server running on port ${PORT}`);
+        console.log(`Server running on ${BIND_HOST}:${PORT}`);
         console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-        console.log(`Frontend available at http://localhost:${PORT}`);
-        console.log(`API available at http://localhost:${PORT}/api`);
+        console.log(`Frontend available at http://${BIND_HOST === '0.0.0.0' ? 'localhost' : BIND_HOST}:${PORT}`);
+        console.log(`API available at http://${BIND_HOST === '0.0.0.0' ? 'localhost' : BIND_HOST}:${PORT}/api`);
         console.log('');
         console.log('Security Features Enabled:');
         console.log('  - Rate Limiting (API, Auth, Upload, Payment)');
@@ -463,6 +465,8 @@ if (process.env.VERCEL !== '1') {
         console.log('  - CORS Configuration');
         console.log('='.repeat(60));
     });
+
+    startPropertyAlertScheduler();
 }
 
 // Export for Vercel serverless

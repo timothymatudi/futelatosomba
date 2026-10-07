@@ -18,10 +18,12 @@ const PropertyForm = ({ initialData = null, isEdit = false }) => {
     currency: initialData?.currency || 'USD',
     propertyType: initialData?.propertyType || '',
     listingType: initialData?.listingType || 'sale',
-    address: initialData?.address || '',
-    city: initialData?.city || '',
-    commune: initialData?.commune || '',
-    province: initialData?.province || '',
+    address: initialData?.location?.address || initialData?.address || '',
+    city: initialData?.location?.city || initialData?.city || '',
+    commune: initialData?.location?.commune || initialData?.commune || '',
+    province: initialData?.location?.province || initialData?.province || '',
+    latitude: initialData?.location?.coordinates?.lat ?? '',
+    longitude: initialData?.location?.coordinates?.lng ?? '',
     bedrooms: initialData?.bedrooms || '',
     bathrooms: initialData?.bathrooms || '',
     area: initialData?.area || '',
@@ -83,13 +85,20 @@ const PropertyForm = ({ initialData = null, isEdit = false }) => {
         formDataToSend.append('features', JSON.stringify(formData.features));
       }
 
-      // Append images
-      formData.images.forEach((img, index) => {
-        if (img.file) {
-          formDataToSend.append('images', img.file);
-          if (img.caption) formDataToSend.append(`imageCaption_${index}`, img.caption);
-          if (img.isPrimary) formDataToSend.append('primaryImageIndex', index);
-        }
+      if (isEdit) {
+        const existingImages = formData.images
+          .filter((img) => !img.file && img.url)
+          .map(({ url, caption, isPrimary }) => ({ url, caption, isPrimary }));
+        formDataToSend.append('existingImages', JSON.stringify(existingImages));
+      }
+
+      // Append new images separately so their metadata indices always match
+      // req.files, even when existing images were reordered or removed.
+      const newImages = formData.images.filter((img) => img.file);
+      newImages.forEach((img, index) => {
+        formDataToSend.append('images', img.file);
+        if (img.caption) formDataToSend.append(`newImageCaption_${index}`, img.caption);
+        if (img.isPrimary) formDataToSend.append('newPrimaryImageIndex', index);
       });
 
       if (isEdit && initialData?._id) {
@@ -258,6 +267,37 @@ const PropertyForm = ({ initialData = null, isEdit = false }) => {
                 onChange={handleChange}
                 placeholder="Province"
               />
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>Latitude *</label>
+                <input
+                  type="number"
+                  name="latitude"
+                  value={formData.latitude}
+                  onChange={handleChange}
+                  required
+                  step="any"
+                  min="-90"
+                  max="90"
+                  placeholder="-4.3276"
+                />
+              </div>
+              <div className="form-group">
+                <label>Longitude *</label>
+                <input
+                  type="number"
+                  name="longitude"
+                  value={formData.longitude}
+                  onChange={handleChange}
+                  required
+                  step="any"
+                  min="-180"
+                  max="180"
+                  placeholder="15.3136"
+                />
+              </div>
             </div>
           </div>
         )}

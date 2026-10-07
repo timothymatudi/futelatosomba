@@ -4,9 +4,16 @@ import { IMAGE_UPLOAD } from '../../utils/constants';
 
 import './ImageUploader.css';
 
+const normalizeImages = (images) => images.map((image, index) => ({
+  ...image,
+  id: image.id || image._id || `existing-${index}-${image.url}`,
+  caption: image.caption || '',
+  isPrimary: image.isPrimary === true
+}));
+
 const ImageUploader = ({ images = [], onImagesChange, maxImages = IMAGE_UPLOAD.MAX_FILES }) => {
   const [dragActive, setDragActive] = useState(false);
-  const [previews, setPreviews] = useState(images);
+  const [previews, setPreviews] = useState(() => normalizeImages(images));
   const fileInputRef = useRef(null);
 
   const validateFile = (file) => {
@@ -69,9 +76,12 @@ const ImageUploader = ({ images = [], onImagesChange, maxImages = IMAGE_UPLOAD.M
   };
 
   const removeImage = (id) => {
-    const updatedPreviews = previews.filter(p => p.id !== id);
+    let updatedPreviews = previews.filter(p => p.id !== id);
     if (updatedPreviews.length > 0 && !updatedPreviews.some(p => p.isPrimary)) {
-      updatedPreviews[0].isPrimary = true;
+      updatedPreviews = updatedPreviews.map((preview, index) => ({
+        ...preview,
+        isPrimary: index === 0
+      }));
     }
     setPreviews(updatedPreviews);
     onImagesChange(updatedPreviews);
@@ -90,6 +100,18 @@ const ImageUploader = ({ images = [], onImagesChange, maxImages = IMAGE_UPLOAD.M
     const updatedPreviews = previews.map(p =>
       p.id === id ? { ...p, caption } : p
     );
+    setPreviews(updatedPreviews);
+    onImagesChange(updatedPreviews);
+  };
+
+  const moveImage = (id, direction) => {
+    const currentIndex = previews.findIndex((preview) => preview.id === id);
+    const nextIndex = currentIndex + direction;
+    if (currentIndex < 0 || nextIndex < 0 || nextIndex >= previews.length) return;
+
+    const updatedPreviews = [...previews];
+    [updatedPreviews[currentIndex], updatedPreviews[nextIndex]] =
+      [updatedPreviews[nextIndex], updatedPreviews[currentIndex]];
     setPreviews(updatedPreviews);
     onImagesChange(updatedPreviews);
   };
@@ -142,6 +164,22 @@ const ImageUploader = ({ images = [], onImagesChange, maxImages = IMAGE_UPLOAD.M
                   {preview.isPrimary && <div className="primary-badge">Primary</div>}
 
                   <div className="preview-actions">
+                    <button
+                      type="button"
+                      onClick={() => moveImage(preview.id, -1)}
+                      title="Move left"
+                      disabled={index === 0}
+                    >
+                      ←
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => moveImage(preview.id, 1)}
+                      title="Move right"
+                      disabled={index === previews.length - 1}
+                    >
+                      →
+                    </button>
                     <button
                       type="button"
                       onClick={() => setPrimaryImage(preview.id)}
