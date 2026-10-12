@@ -48,4 +48,3 @@ skills-lock.json
 *.sh
 frontend/package-lock.json
 backend/scripts/
-vercel.json

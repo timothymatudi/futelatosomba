@@ -23,7 +23,7 @@ if [ "$http_code" = "200" ]; then
     echo "✅ SUCCESS! Backend is running properly!"
     echo ""
     echo "Next steps:"
-    echo "1. Visit frontend: https://futelatosomba-frontend-f1sgrgm90-timothy-s-projects-61ca8a51.vercel.app"
+    echo "1. Visit frontend in your browser"
     echo "2. Try registering a new user"
     echo "3. Check Render logs for any errors"
 elif [ "$http_code" = "502" ] || [ "$http_code" = "503" ]; then

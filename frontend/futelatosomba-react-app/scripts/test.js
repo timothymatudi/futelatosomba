@@ -97,7 +97,6 @@ const config = {
     '^react-router-dom$': '<rootDir>/node_modules/react-router-dom/dist/index.js',
     '^react-router$': '<rootDir>/node_modules/react-router/dist/development/index.js',
     '^react-router/dom$': '<rootDir>/node_modules/react-router/dist/development/dom-export.js',
-    '^@vercel/speed-insights/react$': '<rootDir>/node_modules/@vercel/speed-insights/dist/react/index.js',
     '^axios$': '<rootDir>/node_modules/axios/dist/node/axios.cjs',
   },
   moduleFileExtensions: paths.moduleFileExtensions,

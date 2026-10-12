@@ -125,7 +125,7 @@ app.use(helmet({
 
 // 2. CORS configuration - allow only exact, configured origins.
 // Add preview/deployment URLs via CORS_ALLOWED_ORIGINS as a comma-separated
-// list, e.g. https://preview-one.vercel.app,https://preview-two.vercel.app
+// list, e.g. https://preview-one.example.com,https://preview-two.example.com
 const allowedOrigins = [
     'http://localhost:3000',
     'http://localhost:3001',
@@ -444,30 +444,27 @@ app.use((req, res) => {
     });
 });
 
-// Start server (only in non-serverless environment)
-if (process.env.VERCEL !== '1') {
-    app.listen(PORT, BIND_HOST, () => {
-        console.log('='.repeat(60));
-        console.log('  FUTELATOSOMBA BACKEND SERVER');
-        console.log('='.repeat(60));
-        console.log(`Server running on ${BIND_HOST}:${PORT}`);
-        console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-        console.log(`Frontend available at http://${BIND_HOST === '0.0.0.0' ? 'localhost' : BIND_HOST}:${PORT}`);
-        console.log(`API available at http://${BIND_HOST === '0.0.0.0' ? 'localhost' : BIND_HOST}:${PORT}/api`);
-        console.log('');
-        console.log('Security Features Enabled:');
-        console.log('  - Rate Limiting (API, Auth, Upload, Payment)');
-        console.log('  - CSRF Protection (Double Submit Cookie)');
-        console.log('  - XSS Protection (Input Sanitization)');
-        console.log('  - NoSQL Injection Prevention');
-        console.log('  - Helmet Security Headers');
-        console.log('  - Content Security Policy');
-        console.log('  - CORS Configuration');
-        console.log('='.repeat(60));
-    });
+// Start server
+app.listen(PORT, BIND_HOST, () => {
+    console.log('='.repeat(60));
+    console.log('  FUTELATOSOMBA BACKEND SERVER');
+    console.log('='.repeat(60));
+    console.log(`Server running on ${BIND_HOST}:${PORT}`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`Frontend available at http://${BIND_HOST === '0.0.0.0' ? 'localhost' : BIND_HOST}:${PORT}`);
+    console.log(`API available at http://${BIND_HOST === '0.0.0.0' ? 'localhost' : BIND_HOST}:${PORT}/api`);
+    console.log('');
+    console.log('Security Features Enabled:');
+    console.log('  - Rate Limiting (API, Auth, Upload, Payment)');
+    console.log('  - CSRF Protection (Double Submit Cookie)');
+    console.log('  - XSS Protection (Input Sanitization)');
+    console.log('  - NoSQL Injection Prevention');
+    console.log('  - Helmet Security Headers');
+    console.log('  - Content Security Policy');
+    console.log('  - CORS Configuration');
+    console.log('='.repeat(60));
+});
 
-    startPropertyAlertScheduler();
-}
+startPropertyAlertScheduler();
 
-// Export for Vercel serverless
 module.exports = app;

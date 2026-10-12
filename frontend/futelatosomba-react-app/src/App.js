@@ -1,7 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
-import { SpeedInsights } from "@vercel/speed-insights/react";
 import 'react-toastify/dist/ReactToastify.css';
 
 // Context Providers
@@ -136,7 +135,6 @@ function App() {
                 pauseOnHover
                 theme="light"
               />
-              <SpeedInsights />
             </div>
           </PropertyProvider>
         </AuthProvider>
