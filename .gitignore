@@ -46,5 +46,6 @@ skills-lock.json
 !PROGRESS_ASSISTANT.md
 *.txt
 *.sh
+!deploy/*.sh
 frontend/package-lock.json
 backend/scripts/

@@ -1,0 +1,16 @@
+services:
+  app:
+    build: .
+    image: futelatosomba:latest
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5000:5000"
+    env_file:
+      - backend/.env
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - uploads:/app/backend/uploads
+
+volumes:
+  uploads:
