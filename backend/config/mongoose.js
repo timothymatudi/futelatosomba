@@ -1,5 +1,9 @@
 const mongoose = require('mongoose');
+const dns = require('dns');
 require('dotenv').config();
+
+// VM's DNS can't resolve MongoDB Atlas SRV records; use Google DNS
+dns.setServers(['8.8.8.8', '8.8.4.4']);
 
 const connectDB = async () => {
   try {
