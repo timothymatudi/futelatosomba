@@ -264,6 +264,33 @@ const translations = {
     pleaseWaitVerify: 'Please wait while we verify your email...',
     needHelp: 'Need help?',
     contactSupport: 'Contact Support',
+
+    // Nav (previously hardcoded)
+    findAgents: 'Find Agents',
+    soldPrices: 'Sold Prices',
+    valuation: 'Valuation',
+    mortgage: 'Mortgage',
+
+    // Filters
+    all: 'All',
+    allCities: 'All Cities',
+    allCommunes: 'All Communes',
+    any: 'Any',
+    allTypes: 'All Types',
+    statusActive: 'Active',
+    statusSold: 'Sold',
+    statusRented: 'Rented',
+    createEmailAlert: 'Create Email Alert',
+    features: 'Features',
+    amenities: 'Amenities',
+    featuresPlaceholder: 'e.g. pool, garden, parking',
+    amenitiesPlaceholder: 'e.g. school, hospital nearby',
+    minYearBuilt: 'Min Year Built',
+    maxYearBuilt: 'Max Year Built',
+    minYear: 'Min year',
+    maxYear: 'Max year',
+    status: 'Listing Status',
+    premiumListings: 'Premium listings only',
   },
 
   fr: {
@@ -327,9 +354,9 @@ const translations = {
     confirmPassword: 'Confirmer le Mot de Passe',
     fullName: 'Nom Complet',
     phone: 'Numéro de Téléphone',
-    forgotPassword: 'Mot de passe oublié?',
-    dontHaveAccount: "Vous n'avez pas de compte?",
-    alreadyHaveAccount: 'Vous avez déjà un compte?',
+    forgotPassword: 'Mot de passe oublié ?',
+    dontHaveAccount: "Vous n'avez pas de compte ?",
+    alreadyHaveAccount: 'Vous avez déjà un compte ?',
     createAccount: 'Créer votre compte',
 
     // Dashboard
@@ -341,7 +368,7 @@ const translations = {
 
     // Messages
     welcome: 'Bienvenue à Futelatosomba',
-    findYourDreamHome: 'Trouvez la Maison de Vos Rêves en RDC',
+    findYourDreamHome: 'Trouvez la maison de vos rêves en RDC',
     propertyPlatform: 'La Plateforme Immobilière Leader en République Démocratique du Congo',
 
     // Errors
@@ -481,7 +508,7 @@ const translations = {
     goBack: 'Retour',
 
     // ForgotPassword
-    forgotPasswordTitle: 'Mot de Passe Oublié?',
+    forgotPasswordTitle: 'Mot de Passe Oublié ?',
     forgotPasswordDesc: "Entrez votre adresse email et nous vous enverrons un lien pour réinitialiser votre mot de passe.",
     emailAddress: 'Adresse Email',
     enterYourEmail: 'Entrez votre email',
@@ -515,8 +542,31 @@ const translations = {
     resendVerificationEmail: "Renvoyer l'Email de Vérification",
     tryLoggingIn: 'Essayer de Se Connecter',
     pleaseWaitVerify: 'Veuillez patienter pendant la vérification de votre email...',
-    needHelp: "Besoin d'aide?",
+    needHelp: "Besoin d'aide ?",
     contactSupport: 'Contacter le Support',
+
+    // Nav & Filters (previously missing)
+    findAgents: 'Trouver des Agents',
+    soldPrices: 'Prix de Vente',
+    valuation: 'Estimation',
+    mortgage: 'Prêt Immobilier',
+    all: 'Tous',
+    allCities: 'Toutes les Villes',
+    allCommunes: 'Toutes les Communes',
+    any: 'Peu importe',
+    statusActive: 'Actif',
+    statusSold: 'Vendu',
+    statusRented: 'Loué',
+    createEmailAlert: 'Créer une Alerte Email',
+    features: 'Caractéristiques',
+    featuresPlaceholder: 'ex. piscine, jardin, parking',
+    amenitiesPlaceholder: 'ex. école, hôpital à proximité',
+    minYearBuilt: 'Année de construction min',
+    maxYearBuilt: 'Année de construction max',
+    minYear: 'Année min',
+    maxYear: 'Année max',
+    status: "Statut de l'annonce",
+    premiumListings: 'Annonces premium uniquement',
   },
 
   ln: {
@@ -768,8 +818,31 @@ const translations = {
     resendVerificationEmail: 'Tinda Lisusu Email ya Kokanisa',
     tryLoggingIn: 'Leka Kokota',
     pleaseWaitVerify: 'Linda mwa ntango tikanisa email na yo...',
-    needHelp: 'Ozali na problem?',
+    needHelp: 'Ozali na problem ?',
     contactSupport: 'Bengi Biso',
+
+    // Nav & Filters (previously missing)
+    findAgents: 'Luka Ba Agent',
+    soldPrices: 'Ntalo ya Bandako Etekamaki',
+    valuation: 'Kokakatisa Ntalo',
+    mortgage: 'Lisanso ya Ndako',
+    all: 'Nyonso',
+    allCities: 'Mingomba Nyonso',
+    allCommunes: 'Bacommune Nyonso',
+    any: 'Oyo Nyonso',
+    statusActive: 'Ezali Kokende',
+    statusSold: 'Etekamaki',
+    statusRented: 'Efutamaki',
+    createEmailAlert: 'Sala Elembo ya Email',
+    features: 'Biloko ya Ndako',
+    featuresPlaceholder: 'ndakisa: piscine, jardin, parking',
+    amenitiesPlaceholder: 'ndakisa: école, hôpital pene',
+    minYearBuilt: 'Mbula ya Kotonga (moke)',
+    maxYearBuilt: 'Mbula ya Kotonga (mingi)',
+    minYear: 'Mbula moke',
+    maxYear: 'Mbula mingi',
+    status: 'État ya Bongisi',
+    premiumListings: 'Bandako ya kitoko kaka',
   }
 };
 

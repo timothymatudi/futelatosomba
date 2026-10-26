@@ -80,7 +80,7 @@ const Header = () => {
               className={`nav-link ${isActive('/find-agents') ? 'nav-active' : ''}`}
               onClick={closeMobileMenu}
             >
-              Find Agents
+              {t('findAgents')}
             </Link>
 
             <Link
@@ -88,7 +88,7 @@ const Header = () => {
               className={`nav-link ${isActive('/house-prices') ? 'nav-active' : ''}`}
               onClick={closeMobileMenu}
             >
-              Sold Prices
+              {t('soldPrices')}
             </Link>
 
             <Link
@@ -96,7 +96,7 @@ const Header = () => {
               className={`nav-link ${isActive('/valuation') ? 'nav-active' : ''}`}
               onClick={closeMobileMenu}
             >
-              Valuation
+              {t('valuation')}
             </Link>
 
             <Link
@@ -104,7 +104,7 @@ const Header = () => {
               className={`nav-link ${isActive('/mortgage-calculator') ? 'nav-active' : ''}`}
               onClick={closeMobileMenu}
             >
-              Mortgage
+              {t('mortgage')}
             </Link>
 
             {isAuthenticated && isAgent() && (

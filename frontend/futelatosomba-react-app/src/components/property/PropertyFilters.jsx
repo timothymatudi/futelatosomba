@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
-import { PROPERTY_TYPES, LISTING_TYPES, CITIES, KINSHASA_COMMUNES } from '../../utils/constants';
+import { PROPERTY_TYPES, PROPERTY_TYPE_LABELS, LISTING_TYPES, CITIES, KINSHASA_COMMUNES } from '../../utils/constants';
 import Button from '../common/Button';
 import './PropertyFilters.css';
 
@@ -61,7 +61,7 @@ const PropertyFilters = ({ filters, onFilterChange, onApply, onReset, onCreateAl
               <option value="">{t('allTypes')}</option>
               {Object.values(PROPERTY_TYPES).map((type) => (
                 <option key={type} value={type}>
-                  {getLabel({ en: type, fr: type, ln: type })}
+                  {getLabel(PROPERTY_TYPE_LABELS[type] || { en: type, fr: type, ln: type })}
                 </option>
               ))}
             </select>
@@ -74,7 +74,7 @@ const PropertyFilters = ({ filters, onFilterChange, onApply, onReset, onCreateAl
               value={filters.listingType || ''}
               onChange={(e) => handleInputChange('listingType', e.target.value)}
             >
-              <option value="">All</option>
+              <option value="">{t('all')}</option>
               <option value={LISTING_TYPES.SALE}>{t('forSale')}</option>
               <option value={LISTING_TYPES.RENT}>{t('forRent')}</option>
             </select>
@@ -87,7 +87,7 @@ const PropertyFilters = ({ filters, onFilterChange, onApply, onReset, onCreateAl
               value={filters.city || ''}
               onChange={(e) => handleInputChange('city', e.target.value)}
             >
-              <option value="">All Cities</option>
+              <option value="">{t('allCities')}</option>
               {CITIES.map((city) => (
                 <option key={city} value={city}>
                   {city}
@@ -104,7 +104,7 @@ const PropertyFilters = ({ filters, onFilterChange, onApply, onReset, onCreateAl
                 value={filters.commune || ''}
                 onChange={(e) => handleInputChange('commune', e.target.value)}
               >
-                <option value="">All Communes</option>
+                <option value="">{t('allCommunes')}</option>
                 {KINSHASA_COMMUNES.map((commune) => (
                   <option key={commune} value={commune}>
                     {commune}
@@ -143,7 +143,7 @@ const PropertyFilters = ({ filters, onFilterChange, onApply, onReset, onCreateAl
               value={filters.bedrooms || ''}
               onChange={(e) => handleInputChange('bedrooms', e.target.value)}
             >
-              <option value="">Any</option>
+              <option value="">{t('any')}</option>
               <option value="1">1+</option>
               <option value="2">2+</option>
               <option value="3">3+</option>
@@ -159,7 +159,7 @@ const PropertyFilters = ({ filters, onFilterChange, onApply, onReset, onCreateAl
               value={filters.bathrooms || ''}
               onChange={(e) => handleInputChange('bathrooms', e.target.value)}
             >
-              <option value="">Any</option>
+              <option value="">{t('any')}</option>
               <option value="1">1+</option>
               <option value="2">2+</option>
               <option value="3">3+</option>
@@ -219,9 +219,10 @@ const PropertyFilters = ({ filters, onFilterChange, onApply, onReset, onCreateAl
               value={filters.status || ''}
               onChange={(e) => handleInputChange('status', e.target.value)}
             >
-              <option value="active">Active</option>
-              <option value="sold">Sold</option>
-              <option value="rented">Rented</option>
+              <option value="">{t('any')}</option>
+              <option value="active">{t('statusActive')}</option>
+              <option value="sold">{t('statusSold')}</option>
+              <option value="rented">{t('statusRented')}</option>
             </select>
           </div>
 
@@ -242,7 +243,7 @@ const PropertyFilters = ({ filters, onFilterChange, onApply, onReset, onCreateAl
           </Button>
           {onCreateAlert && (
             <Button variant="outline" onClick={onCreateAlert}>
-              Create Email Alert
+              {t('createEmailAlert')}
             </Button>
           )}
           <Button variant="primary" onClick={handleApply}>
