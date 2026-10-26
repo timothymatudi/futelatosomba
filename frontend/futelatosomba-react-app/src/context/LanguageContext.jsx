@@ -265,6 +265,13 @@ const translations = {
     needHelp: 'Need help?',
     contactSupport: 'Contact Support',
 
+    // Agent registration fields
+    agencyName: 'Agency Name',
+    licenseNumber: 'License Number',
+    agencyAddress: 'Agency Address',
+    agencyLogo: 'Agency Logo URL',
+    featuredProperties: 'Featured Properties',
+
     // Nav (previously hardcoded)
     findAgents: 'Find Agents',
     soldPrices: 'Sold Prices',
@@ -545,6 +552,13 @@ const translations = {
     needHelp: "Besoin d'aide ?",
     contactSupport: 'Contacter le Support',
 
+    // Agent registration fields
+    agencyName: "Nom de l'Agence",
+    licenseNumber: 'Numéro de Licence',
+    agencyAddress: "Adresse de l'Agence",
+    agencyLogo: "URL du Logo de l'Agence",
+    featuredProperties: 'Propriétés en vedette',
+
     // Nav & Filters (previously missing)
     findAgents: 'Trouver des Agents',
     soldPrices: 'Prix de Vente',
@@ -820,6 +834,13 @@ const translations = {
     pleaseWaitVerify: 'Linda mwa ntango tikanisa email na yo...',
     needHelp: 'Ozali na problem ?',
     contactSupport: 'Bengi Biso',
+
+    // Agent registration fields
+    agencyName: 'Nkombo ya Agence',
+    licenseNumber: 'Numéro ya Lisansi',
+    agencyAddress: 'Adresse ya Agence',
+    agencyLogo: 'URL ya Logo ya Agence',
+    featuredProperties: 'Bandako ya Kitoko',
 
     // Nav & Filters (previously missing)
     findAgents: 'Luka Ba Agent',

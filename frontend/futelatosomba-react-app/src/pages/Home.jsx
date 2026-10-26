@@ -148,7 +148,7 @@ const Home = () => {
       <section className="properties-section">
         <div className="container">
           <div className="section-header">
-            <h2 className="section-title">{t('featured')} {t('properties')}</h2>
+            <h2 className="section-title">{t('featuredProperties')}</h2>
             <Button
               variant="outline"
               onClick={() => setViewMode((current) => current === 'list' ? 'map' : 'list')}
