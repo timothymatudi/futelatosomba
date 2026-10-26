@@ -211,11 +211,11 @@ The frontend connects to the backend API at `REACT_APP_API_URL`. Update the `.en
 
 ## Deployment
 
-### Vercel/Netlify
+### Flowstas (Production)
 
-1. Connect your GitHub repository
-2. Set environment variables in dashboard
-3. Deploy automatically on push to main branch
+1. Build the project: `npm run build`
+2. Set `REACT_APP_API_URL=/api` (already set in `.env.production`)
+3. Serve the `build/` folder with nginx; proxy `/api` to the backend
 
 ### Traditional Hosting
 

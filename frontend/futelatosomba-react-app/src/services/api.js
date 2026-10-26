@@ -2,7 +2,7 @@
 import axios from 'axios';
 import { getCsrfToken, CSRF_HEADER_NAME } from '../utils/csrf';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://futelatosomba-ldho.onrender.com/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
 
 // Create axios instance
 const api = axios.create({

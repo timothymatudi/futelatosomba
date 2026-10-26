@@ -1,7 +1,7 @@
 // futelatosomba/frontend/futelatosomba-react-app/src/utils/csrf.js
 
 // Get API base URL from environment or use default
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://futelatosomba-ldho.onrender.com/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
 const CSRF_TOKEN_URL = `${API_BASE_URL}/csrf-token`;
 export const CSRF_HEADER_NAME = 'x-csrf-token';
 
