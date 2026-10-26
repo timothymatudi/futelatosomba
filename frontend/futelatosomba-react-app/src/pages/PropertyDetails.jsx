@@ -23,7 +23,7 @@ const PropertyDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { getLabel } = useLanguage();
+  const { getLabel, t } = useLanguage();
 
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -101,8 +101,8 @@ const PropertyDetails = () => {
   if (!property) {
     return (
       <div className="property-not-found">
-        <h2>Property not found</h2>
-        <Link to="/">Back to Home</Link>
+        <h2>{t('propertyNotFound')}</h2>
+        <Link to="/">{t('backToHome')}</Link>
       </div>
     );
   }
@@ -111,9 +111,9 @@ const PropertyDetails = () => {
     <div className="property-details-page">
       {/* Breadcrumb Navigation */}
       <div className="breadcrumb">
-        <Link to="/">Home</Link>
+        <Link to="/">{t('home')}</Link>
         <span className="separator">/</span>
-        <Link to="/properties">Properties</Link>
+        <Link to="/properties">{t('properties')}</Link>
         <span className="separator">/</span>
         <span className="current">{property.title}</span>
       </div>
@@ -123,7 +123,7 @@ const PropertyDetails = () => {
         <div className="property-title-section">
           <div className="property-badges">
             {property.isPremium && (
-              <span className="badge badge-premium">Premium</span>
+              <span className="badge badge-premium">{t('premium')}</span>
             )}
             {property.listingType && (
               <span className={`badge badge-${property.listingType}`}>
@@ -159,7 +159,7 @@ const PropertyDetails = () => {
               <svg width="24" height="24" viewBox="0 0 24 24" fill={isFavorited ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2">
                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
               </svg>
-              {isFavorited ? 'Saved' : 'Save'}
+              {isFavorited ? t('saved') : t('saveProperty')}
             </button>
             <ShareButtons property={property} />
           </div>
@@ -184,7 +184,7 @@ const PropertyDetails = () => {
                 </svg>
                 <div>
                   <div className="feature-value">{property.bedrooms}</div>
-                  <div className="feature-label">Bedrooms</div>
+                  <div className="feature-label">{t('bedrooms')}</div>
                 </div>
               </div>
             )}
@@ -197,7 +197,7 @@ const PropertyDetails = () => {
                 </svg>
                 <div>
                   <div className="feature-value">{property.bathrooms}</div>
-                  <div className="feature-label">Bathrooms</div>
+                  <div className="feature-label">{t('bathrooms')}</div>
                 </div>
               </div>
             )}
@@ -222,7 +222,7 @@ const PropertyDetails = () => {
                 </svg>
                 <div>
                   <div className="feature-value">{property.views}</div>
-                  <div className="feature-label">Views</div>
+                  <div className="feature-label">{t('views')}</div>
                 </div>
               </div>
             )}
@@ -240,7 +240,7 @@ const PropertyDetails = () => {
 
       {hasCoordinates && (
         <section className="property-location-section" aria-labelledby="property-location-heading">
-          <h2 id="property-location-heading">Property Location</h2>
+          <h2 id="property-location-heading">{t('propertyLocationTitle')}</h2>
           <p>{formatAddress(property.location)}</p>
           <Suspense fallback={<div className="map-loading">Loading map…</div>}>
             <PropertyMap properties={[property]} zoom={15} height="380px" />
@@ -251,7 +251,7 @@ const PropertyDetails = () => {
       {/* Similar Properties Section */}
       {similarProperties.length > 0 && (
         <div className="similar-properties-section">
-          <h2>Similar Properties</h2>
+          <h2>{t('similarProperties')}</h2>
           <div className="similar-properties-grid">
             {similarProperties.map((similarProperty) => (
               <PropertyCard key={similarProperty._id} property={similarProperty} />

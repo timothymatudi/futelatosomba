@@ -11,6 +11,7 @@ import { LanguageProvider } from './context/LanguageContext';
 // Components
 import Header from './components/common/Header';
 import Footer from './components/common/Footer';
+import WhatsAppButton from './components/common/WhatsAppButton';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
 // Pages
@@ -122,6 +123,7 @@ function App() {
                 </Routes>
               </main>
               <Footer />
+              <WhatsAppButton />
 
               <ToastContainer
                 position="top-right"

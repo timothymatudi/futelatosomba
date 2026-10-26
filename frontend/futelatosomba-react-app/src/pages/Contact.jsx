@@ -28,7 +28,7 @@ const Contact = () => {
 
     // Simulate API call
     setTimeout(() => {
-      toast.success('Message sent successfully! We will get back to you soon.');
+      toast.success(t('messageSentSuccess'));
       setFormData({ name: '', email: '', subject: '', message: '' });
       setLoading(false);
     }, 1000);
@@ -39,18 +39,15 @@ const Contact = () => {
       <div className="contact-hero">
         <div className="container">
           <h1 className="contact-title">{t('contactUs')}</h1>
-          <p className="contact-subtitle">We'd love to hear from you</p>
+          <p className="contact-subtitle">{t('contactSubtitle')}</p>
         </div>
       </div>
 
       <div className="container">
         <div className="contact-content">
           <div className="contact-info">
-            <h2 className="info-title">Get in Touch</h2>
-            <p className="info-text">
-              Have questions about listing your property or finding your dream home?
-              Our team is here to help you every step of the way.
-            </p>
+            <h2 className="info-title">{t('getInTouch')}</h2>
+            <p className="info-text">{t('contactInfoText')}</p>
 
             <div className="contact-details">
               <div className="contact-item">
@@ -61,7 +58,7 @@ const Contact = () => {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="contact-label">Address</h3>
+                  <h3 className="contact-label">{t('address')}</h3>
                   <p className="contact-value">Kinshasa, Democratic Republic of Congo</p>
                 </div>
               </div>
@@ -74,7 +71,7 @@ const Contact = () => {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="contact-label">Email</h3>
+                  <h3 className="contact-label">{t('email')}</h3>
                   <p className="contact-value">info@futelatosomba.com</p>
                 </div>
               </div>
@@ -86,8 +83,8 @@ const Contact = () => {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="contact-label">Phone</h3>
-                  <p className="contact-value">+243 XX XXX XXXX</p>
+                  <h3 className="contact-label">{t('phone')}</h3>
+                  <p className="contact-value">+243 993 289 812</p>
                 </div>
               </div>
             </div>
@@ -116,7 +113,7 @@ const Contact = () => {
               />
 
               <Input
-                label="Subject"
+                label={t('subject')}
                 name="subject"
                 value={formData.subject}
                 onChange={handleChange}

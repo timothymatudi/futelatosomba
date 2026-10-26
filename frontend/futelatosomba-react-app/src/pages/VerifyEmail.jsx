@@ -2,14 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import authService from '../services/authService';
+import { useLanguage } from '../context/LanguageContext';
 import './VerifyEmail.css';
 
 const VerifyEmail = () => {
-  const [status, setStatus] = useState('verifying'); // verifying, success, error
+  const [status, setStatus] = useState('verifying');
   const [message, setMessage] = useState('');
   const [resending, setResending] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   useEffect(() => {
     const verifyEmail = async () => {
@@ -25,30 +27,24 @@ const VerifyEmail = () => {
       try {
         const response = await authService.verifyEmail(token);
         setStatus('success');
-        setMessage(response.message || 'Email verified successfully!');
-
-        toast.success('Email verified successfully! You can now log in.');
-
-        // Redirect to login after 3 seconds
-        setTimeout(() => {
-          navigate('/login');
-        }, 3000);
+        setMessage(response.message || t('emailVerifiedTitle'));
+        toast.success(t('emailVerifiedTitle'));
+        setTimeout(() => navigate('/login'), 3000);
       } catch (error) {
         setStatus('error');
         setMessage(
           error.response?.data?.error ||
           'Verification failed. The link may have expired or is invalid.'
         );
-        toast.error('Email verification failed.');
+        toast.error(t('verificationFailedTitle'));
       }
     };
 
     verifyEmail();
-  }, [location, navigate]);
+  }, [location, navigate, t]);
 
   const handleResendVerification = async () => {
-    const email = prompt('Please enter your email address to resend verification:');
-
+    const email = prompt(t('yourEmail') + ':');
     if (!email) return;
 
     setResending(true);
@@ -57,24 +53,24 @@ const VerifyEmail = () => {
       toast.success('Verification email sent! Please check your inbox.');
       setMessage('A new verification email has been sent. Please check your inbox.');
     } catch (error) {
-      toast.error(
-        error.response?.data?.error ||
-        'Failed to resend verification email.'
-      );
+      toast.error(error.response?.data?.error || 'Failed to resend verification email.');
     } finally {
       setResending(false);
     }
+  };
+
+  const titles = {
+    verifying: t('verifyingEmail'),
+    success: t('emailVerifiedTitle'),
+    error: t('verificationFailedTitle'),
   };
 
   return (
     <div className="verify-email-page">
       <div className="verify-email-container">
         <div className="verify-email-card">
-          {/* Icon based on status */}
           <div className={`status-icon ${status}`}>
-            {status === 'verifying' && (
-              <div className="spinner"></div>
-            )}
+            {status === 'verifying' && <div className="spinner"></div>}
             {status === 'success' && (
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
@@ -87,52 +83,31 @@ const VerifyEmail = () => {
             )}
           </div>
 
-          {/* Title */}
-          <h1 className="verify-title">
-            {status === 'verifying' && 'Verifying Your Email...'}
-            {status === 'success' && 'Email Verified!'}
-            {status === 'error' && 'Verification Failed'}
-          </h1>
-
-          {/* Message */}
+          <h1 className="verify-title">{titles[status]}</h1>
           <p className="verify-message">{message}</p>
 
-          {/* Actions based on status */}
           <div className="verify-actions">
             {status === 'success' && (
               <>
-                <Link to="/login" className="btn btn-primary">
-                  Go to Login
-                </Link>
-                <Link to="/" className="btn btn-secondary">
-                  Back to Home
-                </Link>
+                <Link to="/login" className="btn btn-primary">{t('goToLogin')}</Link>
+                <Link to="/" className="btn btn-secondary">{t('backToHome')}</Link>
               </>
             )}
-
             {status === 'error' && (
               <>
-                <button
-                  onClick={handleResendVerification}
-                  className="btn btn-primary"
-                  disabled={resending}
-                >
-                  {resending ? 'Sending...' : 'Resend Verification Email'}
+                <button onClick={handleResendVerification} className="btn btn-primary" disabled={resending}>
+                  {resending ? t('sending') : t('resendVerificationEmail')}
                 </button>
-                <Link to="/login" className="btn btn-secondary">
-                  Try Logging In
-                </Link>
+                <Link to="/login" className="btn btn-secondary">{t('tryLoggingIn')}</Link>
               </>
             )}
-
             {status === 'verifying' && (
-              <p className="loading-text">Please wait while we verify your email...</p>
+              <p className="loading-text">{t('pleaseWaitVerify')}</p>
             )}
           </div>
 
-          {/* Help text */}
           <div className="help-text">
-            <p>Need help? <Link to="/contact">Contact Support</Link></p>
+            <p>{t('needHelp')} <Link to="/contact">{t('contactSupport')}</Link></p>
           </div>
         </div>
       </div>

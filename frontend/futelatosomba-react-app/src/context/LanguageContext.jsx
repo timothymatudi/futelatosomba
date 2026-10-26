@@ -77,6 +77,7 @@ const translations = {
     forgotPassword: 'Forgot Password?',
     dontHaveAccount: "Don't have an account?",
     alreadyHaveAccount: 'Already have an account?',
+    createAccount: 'Create your account',
 
     // Dashboard
     profile: 'Profile',
@@ -113,14 +114,129 @@ const translations = {
     aboutUs: 'About Us',
     ourMission: 'Our Mission',
     ourVision: 'Our Vision',
+    aboutMissionPara1: 'Futelatosomba is dedicated to revolutionizing the property market in the Democratic Republic of Congo. We provide a modern, transparent, and efficient platform connecting property seekers with owners and agents across all major cities in the DRC.',
+    aboutMissionPara2: "Our mission is to make property search and listing simple, accessible, and reliable for everyone in the DRC, whether you're looking to buy, rent, or sell properties.",
+    aboutVisionPara: "We envision a future where finding your dream home or perfect commercial space in the DRC is as easy as a few clicks. Through technology and innovation, we're building trust and transparency in the Congolese property market.",
+    nationwideCoverage: 'Nationwide Coverage',
+    nationwideCoverageText: 'Properties across all major cities in the DRC including Kinshasa, Lubumbashi, Goma, and more.',
+    verifiedListings: 'Verified Listings',
+    verifiedListingsText: 'All property listings are verified to ensure accuracy and authenticity.',
+    professionalAgents: 'Professional Agents',
+    professionalAgentsText: 'Connect with experienced property agents who understand the local market.',
+    ourLeadership: 'Our Leadership',
+    founderRole: 'Founder & Lead Property Specialist',
+    founderBio: "This platform is dedicated to Odiber Jette, who brings many years of experience in the Democratic Republic of Congo property market. Her expertise and dedication have shaped Futelatosomba into a trusted platform for property seekers and owners across the nation.",
+    multiLanguageSupport: 'Multi-Language Support',
+    multiLanguageSupportText: 'Futelatosomba is available in English, French, and Lingala, making it accessible to all Congolese citizens and international visitors. We believe language should never be a barrier to finding your perfect property.',
 
     // Contact
     contactUs: 'Contact Us',
+    contactSubtitle: "We'd love to hear from you",
+    getInTouch: 'Get in Touch',
+    contactInfoText: 'Have questions about listing your property or finding your dream home? Our team is here to help you every step of the way.',
+    address: 'Address',
+    subject: 'Subject',
     sendMessage: 'Send Message',
     message: 'Message',
     yourName: 'Your Name',
     yourEmail: 'Your Email',
-    yourMessage: 'Your Message'
+    yourMessage: 'Your Message',
+    messageSentSuccess: 'Message sent successfully! We will get back to you soon.',
+
+    // Home stats & sections
+    statProperties: 'Properties',
+    statListings: 'Listings',
+    statCities: 'Cities',
+    heroSearchPlaceholder: 'Search properties...',
+    viewList: 'View List',
+    loadingProperties: 'Loading properties...',
+    loadingMap: 'Loading map...',
+    noMappedProperties: 'No mapped properties match the current filters.',
+    viewAllProperties: 'View All Properties',
+    ctaOwnerTitle: 'Are you a property owner or agent?',
+    ctaOwnerText: 'List your properties on Futelatosomba and reach thousands of potential buyers and renters.',
+    getStarted: 'Get Started',
+
+    // PropertyDetails
+    propertyNotFound: 'Property not found',
+    backToHome: 'Back to Home',
+    premium: 'Premium',
+    views: 'Views',
+    propertyLocationTitle: 'Property Location',
+    similarProperties: 'Similar Properties',
+    saved: 'Saved',
+    saveProperty: 'Save',
+
+    // UserDashboard
+    myDashboard: 'My Dashboard',
+    welcomeBackUser: 'Welcome back, {name}!',
+    savedPropertiesTab: 'Saved Properties',
+    savedSearchesTab: 'Saved Searches',
+    recentlyViewedTab: 'Recently Viewed',
+    emailAlertsTab: 'Email Alerts',
+    profileSettingsTab: 'Profile Settings',
+    browseMore: 'Browse More',
+    browseProperties: 'Browse Properties',
+    createNewSearch: 'Create New Search',
+    startSearching: 'Start Searching',
+    createAlert: 'Create Alert',
+    searchProperties: 'Search Properties',
+    noSavedProperties: 'No saved properties yet',
+    noSavedPropertiesText: 'Start exploring and save your favorite properties',
+    noSavedSearches: 'No saved searches yet',
+    noSavedSearchesText: 'Save your search criteria to quickly find properties',
+    noRecentlyViewed: 'No recently viewed properties',
+    noRecentlyViewedText: 'Properties you view will appear here',
+    noEmailAlerts: 'No email alerts yet',
+    noEmailAlertsText: 'Create an alert from the property search filters and we will email you when matching listings appear.',
+    frequency: 'Frequency',
+    viewMatches: 'View matches',
+    deleteAlertBtn: 'Delete alert',
+    lastSent: 'Last sent',
+
+    // NotFound
+    pageNotFound: 'Page Not Found',
+    pageNotFoundText: "The page you're looking for doesn't exist or has been moved.",
+    goHome: 'Go Home',
+    goBack: 'Go Back',
+
+    // ForgotPassword
+    forgotPasswordTitle: 'Forgot Password?',
+    forgotPasswordDesc: "Enter your email address and we'll send you a link to reset your password.",
+    emailAddress: 'Email Address',
+    enterYourEmail: 'Enter your email',
+    sendResetLink: 'Send Reset Link',
+    sending: 'Sending...',
+    checkYourEmail: 'Check Your Email',
+    checkYourEmailSent: "We've sent a password reset link to {email}. Please check your inbox and follow the instructions to reset your password.",
+    didntReceiveEmail: "Didn't receive the email?",
+    tipCheckSpam: 'Check your spam or junk folder',
+    tipCheckEmailAddress: 'Make sure you entered the correct email address',
+    tipWaitMinutes: 'Wait a few minutes and check again',
+    tryDifferentEmail: 'Try Different Email',
+    backToLogin: 'Back to Login',
+
+    // ResetPassword
+    resetPasswordTitle: 'Reset Password',
+    resetPasswordDesc: 'Enter your new password below',
+    newPassword: 'New Password',
+    enterNewPassword: 'Enter new password',
+    passwordMinLength: 'Must be at least 8 characters',
+    confirmPasswordPlaceholder: 'Confirm new password',
+    resettingPassword: 'Resetting Password...',
+    resetPasswordBtn: 'Reset Password',
+    rememberPassword: 'Remember your password?',
+
+    // VerifyEmail
+    verifyingEmail: 'Verifying Your Email...',
+    emailVerifiedTitle: 'Email Verified!',
+    verificationFailedTitle: 'Verification Failed',
+    goToLogin: 'Go to Login',
+    resendVerificationEmail: 'Resend Verification Email',
+    tryLoggingIn: 'Try Logging In',
+    pleaseWaitVerify: 'Please wait while we verify your email...',
+    needHelp: 'Need help?',
+    contactSupport: 'Contact Support',
   },
 
   fr: {
@@ -187,6 +303,7 @@ const translations = {
     forgotPassword: 'Mot de passe oublié?',
     dontHaveAccount: "Vous n'avez pas de compte?",
     alreadyHaveAccount: 'Vous avez déjà un compte?',
+    createAccount: 'Créer votre compte',
 
     // Dashboard
     profile: 'Profil',
@@ -223,14 +340,129 @@ const translations = {
     aboutUs: 'À Propos de Nous',
     ourMission: 'Notre Mission',
     ourVision: 'Notre Vision',
+    aboutMissionPara1: "Futelatosomba se consacre à révolutionner le marché immobilier en République Démocratique du Congo. Nous offrons une plateforme moderne, transparente et efficace qui met en relation les chercheurs de propriétés avec les propriétaires et les agents dans toutes les grandes villes de la RDC.",
+    aboutMissionPara2: "Notre mission est de rendre la recherche et la publication de propriétés simple, accessible et fiable pour tous en RDC, que vous cherchiez à acheter, louer ou vendre des propriétés.",
+    aboutVisionPara: "Nous imaginons un avenir où trouver votre maison de rêve ou le parfait espace commercial en RDC est aussi simple que quelques clics. Grâce à la technologie et à l'innovation, nous construisons la confiance et la transparence dans le marché immobilier congolais.",
+    nationwideCoverage: 'Couverture Nationale',
+    nationwideCoverageText: 'Propriétés dans toutes les grandes villes de la RDC, notamment Kinshasa, Lubumbashi, Goma, et plus encore.',
+    verifiedListings: 'Annonces Vérifiées',
+    verifiedListingsText: 'Toutes les annonces immobilières sont vérifiées pour garantir leur exactitude et leur authenticité.',
+    professionalAgents: 'Agents Professionnels',
+    professionalAgentsText: 'Connectez-vous avec des agents immobiliers expérimentés qui comprennent le marché local.',
+    ourLeadership: 'Notre Direction',
+    founderRole: 'Fondatrice et Spécialiste Immobilière Principale',
+    founderBio: "Cette plateforme est dédiée à Odiber Jette, qui apporte de nombreuses années d'expérience sur le marché immobilier de la République Démocratique du Congo. Son expertise et son dévouement ont façonné Futelatosomba en une plateforme de confiance pour les chercheurs et propriétaires de biens immobiliers à travers le pays.",
+    multiLanguageSupport: 'Support Multilingue',
+    multiLanguageSupportText: "Futelatosomba est disponible en anglais, français et lingala, le rendant accessible à tous les citoyens congolais et aux visiteurs internationaux. Nous croyons que la langue ne devrait jamais être un obstacle pour trouver votre propriété idéale.",
 
     // Contact
     contactUs: 'Contactez-Nous',
+    contactSubtitle: 'Nous serions ravis de vous entendre',
+    getInTouch: 'Prendre Contact',
+    contactInfoText: "Des questions sur la publication de votre propriété ou la recherche de votre maison idéale? Notre équipe est là pour vous aider à chaque étape.",
+    address: 'Adresse',
+    subject: 'Sujet',
     sendMessage: 'Envoyer un Message',
     message: 'Message',
     yourName: 'Votre Nom',
     yourEmail: 'Votre Email',
-    yourMessage: 'Votre Message'
+    yourMessage: 'Votre Message',
+    messageSentSuccess: 'Message envoyé avec succès! Nous vous répondrons bientôt.',
+
+    // Home stats & sections
+    statProperties: 'Propriétés',
+    statListings: 'Annonces',
+    statCities: 'Villes',
+    heroSearchPlaceholder: 'Rechercher des propriétés...',
+    viewList: 'Vue Liste',
+    loadingProperties: 'Chargement des propriétés...',
+    loadingMap: 'Chargement de la carte...',
+    noMappedProperties: 'Aucune propriété sur la carte ne correspond aux filtres actuels.',
+    viewAllProperties: 'Voir Toutes les Propriétés',
+    ctaOwnerTitle: 'Êtes-vous propriétaire ou agent immobilier?',
+    ctaOwnerText: "Publiez vos propriétés sur Futelatosomba et atteignez des milliers d'acheteurs et locataires potentiels.",
+    getStarted: 'Commencer',
+
+    // PropertyDetails
+    propertyNotFound: 'Propriété non trouvée',
+    backToHome: "Retour à l'Accueil",
+    premium: 'Premium',
+    views: 'Vues',
+    propertyLocationTitle: 'Localisation de la Propriété',
+    similarProperties: 'Propriétés Similaires',
+    saved: 'Sauvegardé',
+    saveProperty: 'Sauvegarder',
+
+    // UserDashboard
+    myDashboard: 'Mon Tableau de Bord',
+    welcomeBackUser: 'Bon retour, {name}!',
+    savedPropertiesTab: 'Propriétés Sauvegardées',
+    savedSearchesTab: 'Recherches Sauvegardées',
+    recentlyViewedTab: 'Vus Récemment',
+    emailAlertsTab: 'Alertes Email',
+    profileSettingsTab: 'Paramètres du Profil',
+    browseMore: 'Explorer Plus',
+    browseProperties: 'Explorer les Propriétés',
+    createNewSearch: 'Nouvelle Recherche',
+    startSearching: 'Commencer à Chercher',
+    createAlert: 'Créer une Alerte',
+    searchProperties: 'Rechercher des Propriétés',
+    noSavedProperties: 'Aucune propriété sauvegardée',
+    noSavedPropertiesText: 'Explorez et sauvegardez vos propriétés favorites',
+    noSavedSearches: 'Aucune recherche sauvegardée',
+    noSavedSearchesText: 'Sauvegardez vos critères de recherche pour trouver rapidement des propriétés',
+    noRecentlyViewed: 'Aucune propriété vue récemment',
+    noRecentlyViewedText: 'Les propriétés que vous consultez apparaîtront ici',
+    noEmailAlerts: 'Aucune alerte email',
+    noEmailAlertsText: 'Créez une alerte depuis les filtres de recherche et nous vous enverrons un email dès que des annonces correspondantes apparaissent.',
+    frequency: 'Fréquence',
+    viewMatches: 'Voir les correspondances',
+    deleteAlertBtn: "Supprimer l'alerte",
+    lastSent: 'Dernier envoi',
+
+    // NotFound
+    pageNotFound: 'Page Non Trouvée',
+    pageNotFoundText: "La page que vous recherchez n'existe pas ou a été déplacée.",
+    goHome: "Aller à l'Accueil",
+    goBack: 'Retour',
+
+    // ForgotPassword
+    forgotPasswordTitle: 'Mot de Passe Oublié?',
+    forgotPasswordDesc: "Entrez votre adresse email et nous vous enverrons un lien pour réinitialiser votre mot de passe.",
+    emailAddress: 'Adresse Email',
+    enterYourEmail: 'Entrez votre email',
+    sendResetLink: 'Envoyer le Lien',
+    sending: 'Envoi...',
+    checkYourEmail: 'Vérifiez Votre Email',
+    checkYourEmailSent: "Nous avons envoyé un lien de réinitialisation à {email}. Veuillez vérifier votre boîte de réception et suivre les instructions.",
+    didntReceiveEmail: "Vous n'avez pas reçu l'email?",
+    tipCheckSpam: 'Vérifiez votre dossier spam ou courrier indésirable',
+    tipCheckEmailAddress: "Assurez-vous d'avoir entré la bonne adresse email",
+    tipWaitMinutes: 'Attendez quelques minutes et vérifiez à nouveau',
+    tryDifferentEmail: 'Essayer un Autre Email',
+    backToLogin: 'Retour à la Connexion',
+
+    // ResetPassword
+    resetPasswordTitle: 'Réinitialiser le Mot de Passe',
+    resetPasswordDesc: 'Entrez votre nouveau mot de passe ci-dessous',
+    newPassword: 'Nouveau Mot de Passe',
+    enterNewPassword: 'Entrez le nouveau mot de passe',
+    passwordMinLength: 'Doit avoir au moins 8 caractères',
+    confirmPasswordPlaceholder: 'Confirmez le nouveau mot de passe',
+    resettingPassword: 'Réinitialisation...',
+    resetPasswordBtn: 'Réinitialiser le Mot de Passe',
+    rememberPassword: 'Vous vous souvenez de votre mot de passe?',
+
+    // VerifyEmail
+    verifyingEmail: 'Vérification de votre email...',
+    emailVerifiedTitle: 'Email Vérifié!',
+    verificationFailedTitle: 'Échec de la Vérification',
+    goToLogin: 'Aller à la Connexion',
+    resendVerificationEmail: "Renvoyer l'Email de Vérification",
+    tryLoggingIn: 'Essayer de Se Connecter',
+    pleaseWaitVerify: 'Veuillez patienter pendant la vérification de votre email...',
+    needHelp: "Besoin d'aide?",
+    contactSupport: 'Contacter le Support',
   },
 
   ln: {
@@ -297,6 +529,7 @@ const translations = {
     forgotPassword: 'Obosani Mot de Passe?',
     dontHaveAccount: 'Ozali na Compte te?',
     alreadyHaveAccount: 'Ozali na Compte?',
+    createAccount: 'Sala Compte na Yo',
 
     // Dashboard
     profile: 'Profil',
@@ -333,21 +566,135 @@ const translations = {
     aboutUs: 'Likambo ya Biso',
     ourMission: 'Mission na Biso',
     ourVision: 'Vision na Biso',
+    aboutMissionPara1: 'Futelatosomba ezali koluka kobongola esika ya bandako na Republique Democratique ya Congo. Tozali kopesa plateforme ya sika, ya polele mpe ya malamu oyo ekutanisa bato oyo baluki bandako na bato ya bandako mpe ba agent na mingomba nyonso ya RDC.',
+    aboutMissionPara2: 'Mission na biso ezali kosala ete koluka mpe kotiya bandako ezala pɛtɛ, ezo kogumba mpe ya solo mpo na bato nyonso na RDC, soki oluki kosomba, kofuta to koteka bandako.',
+    aboutVisionPara: 'Tomonaka liboso esika oyo kozwa ndako ya ndoto na yo to esika ya biznis na RDC ekozala pɛtɛ lokola clic moke. Na nzela ya teknoloji, tozali kotonga kondima mpe polele na esika ya bandako ya Kongo.',
+    nationwideCoverage: 'Mingomba Nionso',
+    nationwideCoverageText: 'Bandako na mingomba nyonso ya RDC: Kinshasa, Lubumbashi, Goma, mpe mingi.',
+    verifiedListings: 'Bandako Ekanisami',
+    verifiedListingsText: 'Bandako nyonso ekanisami mpo na solo mpe bosolo.',
+    professionalAgents: 'Ba Agent ya Solo',
+    professionalAgentsText: 'Kutana na ba agent ya bandako oyo bayebi esika ya liboso.',
+    ourLeadership: 'Bokonzi na Biso',
+    founderRole: 'Moto ya Liboso & Spécialiste ya Bandako',
+    founderBio: 'Plateforme oyo etyelemi mpo na Odiber Jette, oyo azali na mbula mingi ya makoki na esika ya bandako ya RDC. Boyebi mpe bolingo na ye esalisi Futelatosomba kozala plateforme ya kondima mpo na bato nyonso na ekolo.',
+    multiLanguageSupport: 'Minoko Mingi',
+    multiLanguageSupportText: 'Futelatosomba ezali na Lingelesi, Français mpe Lingala, mpo na bato nyonso ya Kongo mpe bato ya mboka mosusu. Tokanisi ete lolemu ekoki te kozalisa nkango ya kozwa ndako na yo ya kitoko.',
 
     // Contact
     contactUs: 'Bengi Biso',
+    contactSubtitle: 'Tolingaka koyoka yo',
+    getInTouch: 'Kokutana na Biso',
+    contactInfoText: 'Ozali na mituna mpo na kotiya ndako na yo to koluka ndako ya yo? Biso tozali awa mpo na kosalisa yo na etape nyonso.',
+    address: 'Adresse',
+    subject: 'Likambo',
     sendMessage: 'Tinda Sango',
     message: 'Sango',
     yourName: 'Nkombo na Yo',
     yourEmail: 'Email na Yo',
-    yourMessage: 'Sango na Yo'
+    yourMessage: 'Sango na Yo',
+    messageSentSuccess: 'Sango etindami malamu! Tokozongela yo nokinoki.',
+
+    // Home stats & sections
+    statProperties: 'Bandako',
+    statListings: 'Babongisi',
+    statCities: 'Mingomba',
+    heroSearchPlaceholder: 'Koluka bandako...',
+    viewList: 'Komona Liste',
+    loadingProperties: 'Kokanga bandako...',
+    loadingMap: 'Kokanga carte...',
+    noMappedProperties: 'Bandako ezali te na carte oyo ekokani na boponi.',
+    viewAllProperties: 'Komona Bandako Nyonso',
+    ctaOwnerTitle: 'Ozali moto ya ndako to agent?',
+    ctaOwnerText: 'Tiya bandako na yo na Futelatosomba mpe kokutana na bato mingi oyo balingi kosomba to kofuta.',
+    getStarted: 'Kobanda',
+
+    // PropertyDetails
+    propertyNotFound: 'Ndako ezwami te',
+    backToHome: 'Kozonga Ndako',
+    premium: 'Ya Kitoko',
+    views: 'Bato Bamoni',
+    propertyLocationTitle: 'Esika ya Ndako',
+    similarProperties: 'Bandako Lokola Oyo',
+    saved: 'Ebombami',
+    saveProperty: 'Kobomba',
+
+    // UserDashboard
+    myDashboard: 'Tableau na Ngai',
+    welcomeBackUser: 'Boyei Malamu, {name}!',
+    savedPropertiesTab: 'Bandako Ebombami',
+    savedSearchesTab: 'Biluka Ebombami',
+    recentlyViewedTab: "Emoni Sik'oyo",
+    emailAlertsTab: 'Bilamba ya Email',
+    profileSettingsTab: 'Paramètres ya Profil',
+    browseMore: 'Kotala Lisusu',
+    browseProperties: 'Kotala Bandako',
+    createNewSearch: 'Luka Mpo ya Sika',
+    startSearching: 'Kobanda Koluka',
+    createAlert: 'Sala Elembo',
+    searchProperties: 'Koluka Bandako',
+    noSavedProperties: 'Bandako ebombami ezali te',
+    noSavedPropertiesText: 'Tala mpe bomba bandako oyo olingaka',
+    noSavedSearches: 'Biluka ebombami ezali te',
+    noSavedSearchesText: 'Bomba biluka na yo mpo na kozwa nokinoki bandako',
+    noRecentlyViewed: 'Omoni eloko moko te sik\'oyo',
+    noRecentlyViewedText: 'Bandako oyo omoni ekozala awa',
+    noEmailAlerts: 'Bilamba ya email ezali te',
+    noEmailAlertsText: 'Sala elembo uta na boponi ya koluka mpe tokotumelela yo email ntango bandako ya ndenge moko eyaki.',
+    frequency: 'Mbala na Mbala',
+    viewMatches: 'Komona oyo ekokani',
+    deleteAlertBtn: 'Kolongola elembo',
+    lastSent: 'Etindami nsuka',
+
+    // NotFound
+    pageNotFound: 'Lokasa Ezwami Te',
+    pageNotFoundText: "Lokasa oyo oluki ezali te to ekangami.",
+    goHome: 'Kozonga Ndako',
+    goBack: 'Kozonga Nsima',
+
+    // ForgotPassword
+    forgotPasswordTitle: 'Obosani Mot de Passe?',
+    forgotPasswordDesc: 'Tiya adresse ya email na yo mpe tokotumelela yo lien ya kobongola mot de passe.',
+    emailAddress: 'Adresse ya Email',
+    enterYourEmail: 'Tiya email na yo',
+    sendResetLink: 'Tinda Lien',
+    sending: 'Kotinda...',
+    checkYourEmail: 'Tala Email na Yo',
+    checkYourEmailSent: 'Totindeli yo lien ya kobongola na {email}. Tala boîte ya yo mpelanda malako.',
+    didntReceiveEmail: 'Ozwi email te?',
+    tipCheckSpam: 'Tala dossier spam na yo',
+    tipCheckEmailAddress: 'Kangisa ete otiyaki adresse ya malamu',
+    tipWaitMinutes: 'Linda miniti moke mpe tala lisusu',
+    tryDifferentEmail: 'Leka Email Mosusu',
+    backToLogin: 'Kozonga Kokota',
+
+    // ResetPassword
+    resetPasswordTitle: 'Kobongola Mot de Passe',
+    resetPasswordDesc: 'Tiya mot de passe ya sika awa na nse',
+    newPassword: 'Mot de Passe ya Sika',
+    enterNewPassword: 'Tiya mot de passe ya sika',
+    passwordMinLength: 'Esengeli kozala na minimo 8 ba caractère',
+    confirmPasswordPlaceholder: 'Ndimisa mot de passe ya sika',
+    resettingPassword: 'Kobongola...',
+    resetPasswordBtn: 'Kobongola Mot de Passe',
+    rememberPassword: 'Ozali koyeba mot de passe na yo?',
+
+    // VerifyEmail
+    verifyingEmail: 'Kokanisa email na yo...',
+    emailVerifiedTitle: 'Email Ekanisami!',
+    verificationFailedTitle: 'Kokanisa Ekoseli',
+    goToLogin: 'Kokota',
+    resendVerificationEmail: 'Tinda Lisusu Email ya Kokanisa',
+    tryLoggingIn: 'Leka Kokota',
+    pleaseWaitVerify: 'Linda mwa ntango tikanisa email na yo...',
+    needHelp: 'Ozali na problem?',
+    contactSupport: 'Bengi Biso',
   }
 };
 
 export const LanguageProvider = ({ children }) => {
   const [language, setLanguage] = useState(LANGUAGES.EN);
 
-  // Initialize language from localStorage
   useEffect(() => {
     const savedLanguage = localStorage.getItem(LOCAL_STORAGE_KEYS.LANGUAGE);
     if (savedLanguage && Object.values(LANGUAGES).includes(savedLanguage)) {
@@ -355,7 +702,6 @@ export const LanguageProvider = ({ children }) => {
     }
   }, []);
 
-  // Change language
   const changeLanguage = (newLanguage) => {
     if (Object.values(LANGUAGES).includes(newLanguage)) {
       setLanguage(newLanguage);
@@ -363,7 +709,6 @@ export const LanguageProvider = ({ children }) => {
     }
   };
 
-  // Get translation
   const t = (key, params = {}) => {
     const keys = key.split('.');
     let translation = translations[language];
@@ -378,7 +723,6 @@ export const LanguageProvider = ({ children }) => {
     }
 
     if (typeof translation === 'string') {
-      // Replace parameters in translation
       let result = translation;
       Object.keys(params).forEach(param => {
         result = result.replace(`{${param}}`, params[param]);
@@ -386,34 +730,26 @@ export const LanguageProvider = ({ children }) => {
       return result;
     }
 
-    // Fallback to English if translation not found
+    // Fallback to English
     let fallback = translations[LANGUAGES.EN];
     for (const k of keys) {
       if (fallback && typeof fallback === 'object') {
         fallback = fallback[k];
       } else {
-        return key; // Return key if no translation found
+        return key;
       }
     }
 
     return fallback || key;
   };
 
-  // Get label from object with language keys
   const getLabel = (labelObj, defaultValue = '') => {
     if (!labelObj) return defaultValue;
-
     if (typeof labelObj === 'string') return labelObj;
-
     return labelObj[language] || labelObj[LANGUAGES.EN] || defaultValue;
   };
 
-  const value = {
-    language,
-    changeLanguage,
-    t,
-    getLabel
-  };
+  const value = { language, changeLanguage, t, getLabel };
 
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
 };

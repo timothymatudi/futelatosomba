@@ -112,7 +112,7 @@ const Home = () => {
             <input
               type="text"
               className="hero-search-input"
-              placeholder={t('search') + ' properties...'}
+              placeholder={t('heroSearchPlaceholder')}
               value={filters.search || ''}
               onChange={(e) => {
                 updateFilters({ search: e.target.value });
@@ -131,15 +131,15 @@ const Home = () => {
           <div className="hero-stats">
             <div className="stat-item">
               <div className="stat-value">{overviewStats ? overviewStats.totalProperties : '...'}</div>
-              <div className="stat-label">Properties</div>
+              <div className="stat-label">{t('statProperties')}</div>
             </div>
             <div className="stat-item">
               <div className="stat-value">{overviewStats ? overviewStats.forSale + overviewStats.forRent : '...'}</div>
-              <div className="stat-label">Listings</div> {/* Changed from Agents to Listings */}
+              <div className="stat-label">{t('statListings')}</div>
             </div>
             <div className="stat-item">
               <div className="stat-value">{overviewStats && overviewStats.cities ? overviewStats.cities.length : '...'}</div>
-              <div className="stat-label">Cities</div>
+              <div className="stat-label">{t('statCities')}</div>
             </div>
           </div>
         </div>
@@ -153,7 +153,7 @@ const Home = () => {
               variant="outline"
               onClick={() => setViewMode((current) => current === 'list' ? 'map' : 'list')}
             >
-              {viewMode === 'list' ? t('viewMap') : 'View List'}
+              {viewMode === 'list' ? t('viewMap') : t('viewList')}
             </Button>
           </div>
 
@@ -173,15 +173,13 @@ const Home = () => {
           ) : (
             <div className="property-map-results">
               {loading ? (
-                <div className="map-status">Loading properties…</div>
+                <div className="map-status">{t('loadingProperties')}</div>
               ) : mappedProperties.length > 0 ? (
-                <Suspense fallback={<div className="map-status">Loading map…</div>}>
+                <Suspense fallback={<div className="map-status">{t('loadingMap')}</div>}>
                   <PropertyMap properties={mappedProperties} zoom={11} height="600px" />
                 </Suspense>
               ) : (
-                <div className="map-status">
-                  No mapped properties match the current filters.
-                </div>
+                <div className="map-status">{t('noMappedProperties')}</div>
               )}
             </div>
           )}
@@ -189,7 +187,7 @@ const Home = () => {
           {(properties || []).length > 12 && (
             <div className="view-all-container">
               <Button variant="primary" size="large" onClick={() => navigate('/properties')}>
-                View All Properties
+                {t('viewAllProperties')}
               </Button>
             </div>
           )}
@@ -199,12 +197,10 @@ const Home = () => {
       <section className="cta-section">
         <div className="container">
           <div className="cta-content">
-            <h2 className="cta-title">Are you a property owner or agent?</h2>
-            <p className="cta-text">
-              List your properties on Futelatosomba and reach thousands of potential buyers and renters.
-            </p>
+            <h2 className="cta-title">{t('ctaOwnerTitle')}</h2>
+            <p className="cta-text">{t('ctaOwnerText')}</p>
             <Button variant="secondary" size="large" onClick={() => navigate('/register')}>
-              Get Started
+              {t('getStarted')}
             </Button>
           </div>
         </div>

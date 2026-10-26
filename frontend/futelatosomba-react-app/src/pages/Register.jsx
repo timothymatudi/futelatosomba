@@ -25,7 +25,7 @@ const Register = () => {
               <h1>Futelatosomba</h1>
             </div>
             <h2 className="auth-title">{t('register')}</h2>
-            <p className="auth-subtitle">Create your account</p>
+            <p className="auth-subtitle">{t('createAccount')}</p>
           </div>
 
           <RegisterForm onSuccess={handleSuccess} />

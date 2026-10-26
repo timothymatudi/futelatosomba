@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import propertyService from '../services/propertyService';
 import userService from '../services/userService';
 import SavedPropertyCard from '../components/dashboard/SavedPropertyCard';
@@ -15,6 +16,7 @@ import './UserDashboard.css';
 const UserDashboard = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState('saved');
   const [loading, setLoading] = useState(true);
   const [savedProperties, setSavedProperties] = useState([]);
@@ -126,8 +128,8 @@ const UserDashboard = () => {
     <div className="user-dashboard-page">
       <div className="dashboard-header">
         <div>
-          <h1>My Dashboard</h1>
-          <p>Welcome back, {user?.fullName || 'User'}!</p>
+          <h1>{t('myDashboard')}</h1>
+          <p>{t('welcomeBackUser', { name: user?.fullName || 'User' })}</p>
         </div>
       </div>
 
@@ -139,7 +141,7 @@ const UserDashboard = () => {
             </svg>
           }
           value={stats.savedProperties}
-          label="Saved Properties"
+          label={t('savedPropertiesTab')}
           color="#dc3545"
         />
 
@@ -151,7 +153,7 @@ const UserDashboard = () => {
             </svg>
           }
           value={stats.savedSearches}
-          label="Saved Searches"
+          label={t('savedSearchesTab')}
           color="#007FFF"
         />
 
@@ -163,7 +165,7 @@ const UserDashboard = () => {
             </svg>
           }
           value={stats.recentlyViewed}
-          label="Recently Viewed"
+          label={t('recentlyViewedTab')}
           color="#28a745"
         />
 
@@ -175,7 +177,7 @@ const UserDashboard = () => {
             </svg>
           }
           value={stats.propertyAlerts}
-          label="Email Alerts"
+          label={t('emailAlertsTab')}
           color="#ff9800"
         />
       </div>
@@ -188,7 +190,7 @@ const UserDashboard = () => {
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
           </svg>
-          Saved Properties ({stats.savedProperties})
+          {t('savedPropertiesTab')} ({stats.savedProperties})
         </button>
 
         <button
@@ -199,7 +201,7 @@ const UserDashboard = () => {
             <circle cx="11" cy="11" r="8"></circle>
             <path d="m21 21-4.35-4.35"></path>
           </svg>
-          Saved Searches ({stats.savedSearches})
+          {t('savedSearchesTab')} ({stats.savedSearches})
         </button>
 
         <button
@@ -210,7 +212,7 @@ const UserDashboard = () => {
             <circle cx="12" cy="12" r="10"></circle>
             <polyline points="12 6 12 12 16 14"></polyline>
           </svg>
-          Recently Viewed ({stats.recentlyViewed})
+          {t('recentlyViewedTab')} ({stats.recentlyViewed})
         </button>
 
         <button
@@ -221,7 +223,7 @@ const UserDashboard = () => {
             <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
             <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
           </svg>
-          Email Alerts ({stats.propertyAlerts})
+          {t('emailAlertsTab')} ({stats.propertyAlerts})
         </button>
 
         <button
@@ -232,7 +234,7 @@ const UserDashboard = () => {
             <circle cx="12" cy="12" r="3"></circle>
             <path d="M12 1v6m0 6v6m-6-6h6m6 0h-6m-3.66 7.07l4.24-4.24m-4.24 0l4.24 4.24M5.93 5.93l4.24 4.24m0 0L5.93 14.41"></path>
           </svg>
-          Profile Settings
+          {t('profileSettingsTab')}
         </button>
       </div>
 
@@ -240,10 +242,10 @@ const UserDashboard = () => {
         {activeTab === 'saved' && (
           <div className="tab-content">
             <div className="section-header">
-              <h2>Saved Properties</h2>
+              <h2>{t('savedPropertiesTab')}</h2>
               {savedProperties.length > 0 && (
                 <button className="btn-browse" onClick={() => navigate('/properties')}>
-                  Browse More
+                  {t('browseMore')}
                 </button>
               )}
             </div>
@@ -253,10 +255,10 @@ const UserDashboard = () => {
                 <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                 </svg>
-                <h3>No saved properties yet</h3>
-                <p>Start exploring and save your favorite properties</p>
+                <h3>{t('noSavedProperties')}</h3>
+                <p>{t('noSavedPropertiesText')}</p>
                 <button className="btn-browse" onClick={() => navigate('/properties')}>
-                  Browse Properties
+                  {t('browseProperties')}
                 </button>
               </div>
             ) : (
@@ -276,9 +278,9 @@ const UserDashboard = () => {
         {activeTab === 'searches' && (
           <div className="tab-content">
             <div className="section-header">
-              <h2>Saved Searches</h2>
+              <h2>{t('savedSearchesTab')}</h2>
               <button className="btn-browse" onClick={() => navigate('/properties')}>
-                Create New Search
+                {t('createNewSearch')}
               </button>
             </div>
 
@@ -288,10 +290,10 @@ const UserDashboard = () => {
                   <circle cx="11" cy="11" r="8"></circle>
                   <path d="m21 21-4.35-4.35"></path>
                 </svg>
-                <h3>No saved searches yet</h3>
-                <p>Save your search criteria to quickly find properties</p>
+                <h3>{t('noSavedSearches')}</h3>
+                <p>{t('noSavedSearchesText')}</p>
                 <button className="btn-browse" onClick={() => navigate('/properties')}>
-                  Start Searching
+                  {t('startSearching')}
                 </button>
               </div>
             ) : (
@@ -312,7 +314,7 @@ const UserDashboard = () => {
         {activeTab === 'recent' && (
           <div className="tab-content">
             <div className="section-header">
-              <h2>Recently Viewed</h2>
+              <h2>{t('recentlyViewedTab')}</h2>
             </div>
 
             {recentlyViewed.length === 0 ? (
@@ -321,10 +323,10 @@ const UserDashboard = () => {
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                   <circle cx="12" cy="12" r="3"></circle>
                 </svg>
-                <h3>No recently viewed properties</h3>
-                <p>Properties you view will appear here</p>
+                <h3>{t('noRecentlyViewed')}</h3>
+                <p>{t('noRecentlyViewedText')}</p>
                 <button className="btn-browse" onClick={() => navigate('/properties')}>
-                  Browse Properties
+                  {t('browseProperties')}
                 </button>
               </div>
             ) : (
@@ -344,9 +346,9 @@ const UserDashboard = () => {
         {activeTab === 'alerts' && (
           <div className="tab-content">
             <div className="section-header">
-              <h2>Email Property Alerts</h2>
+              <h2>{t('emailAlertsTab')}</h2>
               <button className="btn-browse" onClick={() => navigate('/properties')}>
-                Create Alert
+                {t('createAlert')}
               </button>
             </div>
 
@@ -356,10 +358,10 @@ const UserDashboard = () => {
                   <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
                   <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
                 </svg>
-                <h3>No email alerts yet</h3>
-                <p>Create an alert from the property search filters and we will email you when matching listings appear.</p>
+                <h3>{t('noEmailAlerts')}</h3>
+                <p>{t('noEmailAlertsText')}</p>
                 <button className="btn-browse" onClick={() => navigate('/properties')}>
-                  Search Properties
+                  {t('searchProperties')}
                 </button>
               </div>
             ) : (
@@ -375,7 +377,7 @@ const UserDashboard = () => {
                       </div>
                       <div className="saved-search-info">
                         <h3 className="saved-search-name">{alert.name}</h3>
-                        <p className="saved-search-summary">Frequency: {alert.frequency || 'instant'}</p>
+                        <p className="saved-search-summary">{t('frequency')}: {alert.frequency || 'instant'}</p>
                       </div>
                     </div>
                     <div className="saved-search-meta">
@@ -387,14 +389,14 @@ const UserDashboard = () => {
                     </div>
                     <div className="saved-search-actions">
                       <button className="btn-search-action btn-run" onClick={() => handleRunAlertSearch(alert)}>
-                        View matches
+                        {t('viewMatches')}
                       </button>
                       <button className="btn-search-action btn-delete" onClick={() => handleDeleteAlert(alert._id)}>
-                        Delete alert
+                        {t('deleteAlertBtn')}
                       </button>
                     </div>
                     {alert.lastNotifiedAt && (
-                      <p className="saved-search-date">Last sent: {new Date(alert.lastNotifiedAt).toLocaleString()}</p>
+                      <p className="saved-search-date">{t('lastSent')}: {new Date(alert.lastNotifiedAt).toLocaleString()}</p>
                     )}
                   </div>
                 ))}

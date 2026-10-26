@@ -1,21 +1,21 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import './ForgotPassword.css';
 
 const ForgotPassword = () => {
   const { requestPasswordReset } = useAuth();
+  const { t } = useLanguage();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
       setLoading(true);
       const result = await requestPasswordReset(email);
-
       if (result.success) {
         setSubmitted(true);
       }
@@ -38,27 +38,24 @@ const ForgotPassword = () => {
               </svg>
             </div>
 
-            <h1>Check Your Email</h1>
-            <p>
-              We've sent a password reset link to <strong>{email}</strong>.
-              Please check your inbox and follow the instructions to reset your password.
-            </p>
+            <h1>{t('checkYourEmail')}</h1>
+            <p>{t('checkYourEmailSent', { email })}</p>
 
             <div className="email-tips">
-              <p className="tip-title">Didn't receive the email?</p>
+              <p className="tip-title">{t('didntReceiveEmail')}</p>
               <ul>
-                <li>Check your spam or junk folder</li>
-                <li>Make sure you entered the correct email address</li>
-                <li>Wait a few minutes and check again</li>
+                <li>{t('tipCheckSpam')}</li>
+                <li>{t('tipCheckEmailAddress')}</li>
+                <li>{t('tipWaitMinutes')}</li>
               </ul>
             </div>
 
             <div className="forgot-actions">
               <button className="btn-resend" onClick={() => setSubmitted(false)}>
-                Try Different Email
+                {t('tryDifferentEmail')}
               </button>
               <Link to="/login" className="btn-back">
-                Back to Login
+                {t('backToLogin')}
               </Link>
             </div>
           </div>
@@ -78,27 +75,25 @@ const ForgotPassword = () => {
             </svg>
           </div>
 
-          <h1>Forgot Password?</h1>
-          <p className="forgot-description">
-            Enter your email address and we'll send you a link to reset your password.
-          </p>
+          <h1>{t('forgotPasswordTitle')}</h1>
+          <p className="forgot-description">{t('forgotPasswordDesc')}</p>
 
           <form onSubmit={handleSubmit} className="forgot-form">
             <div className="form-group">
-              <label htmlFor="email">Email Address</label>
+              <label htmlFor="email">{t('emailAddress')}</label>
               <input
                 type="email"
                 id="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
+                placeholder={t('enterYourEmail')}
                 required
                 autoFocus
               />
             </div>
 
             <button type="submit" className="btn-submit" disabled={loading}>
-              {loading ? 'Sending...' : 'Send Reset Link'}
+              {loading ? t('sending') : t('sendResetLink')}
             </button>
           </form>
 
@@ -108,7 +103,7 @@ const ForgotPassword = () => {
                 <line x1="19" y1="12" x2="5" y2="12"></line>
                 <polyline points="12 19 5 12 12 5"></polyline>
               </svg>
-              Back to Login
+              {t('backToLogin')}
             </Link>
           </div>
         </div>
